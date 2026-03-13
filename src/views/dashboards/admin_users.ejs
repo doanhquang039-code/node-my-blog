@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .table-container { border-radius: 15px; overflow: hidden; border: none; }
+        .badge-role { min-width: 85px; text-align: center; padding: 6px 10px; }
+        .btn-action { transition: all 0.2s; border-radius: 8px; font-size: 0.85rem; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .avatar-circle { width: 42px; height: 42px; background: linear-gradient(135deg, #0d6efd, #0dcaf0); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 p-4 bg-white shadow-sm rounded-4 border-start border-primary border-5">
+            <div>
+                <h2 class="fw-bold text-primary mb-1"><i class="bi bi-shield-lock-fill"></i> QUẢN TRỊ VIÊN</h2>
+                <p class="text-muted mb-0">Chào sếp <strong><%= user.name %></strong>. Hệ thống hiện có <span class="badge bg-primary"><%= users.length %></span> thành viên.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/admin/users/create" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="bi bi-person-plus-fill"></i> Thêm User mới
+                </a>
+                <a href="/admin/posts" class="btn btn-primary rounded-pill px-4 shadow-sm">
+        <i class="bi bi-journal-text"></i> Bài viết
+    </a>
+                <a href="/admin" class="btn btn-outline-primary rounded-pill px-4">
+                    <i class="bi bi-tags"></i> Danh mục
+                </a>
+                <a href="/logout" class="btn btn-danger rounded-pill px-4">
+                    <i class="bi bi-power"></i> Thoát
+                </a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm table-container">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="card-title mb-0 fw-bold text-secondary"><i class="bi bi-list-stars"></i> Danh sách thành viên</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4" style="width: 10%">ID</th>
+                                <th style="width: 35%">Thành viên</th>
+                                <th style="width: 15%">Quyền hạn</th>
+                                <th style="width: 20%">Ngày tham gia</th>
+                                <th class="text-end pe-4" style="width: 20%">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (users && users.length > 0) { %>
+                                <% users.forEach(u => { %>
+                                    <tr>
+                                        <td class="ps-4 text-muted fw-bold">#<%= u.id %></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle me-3 shadow-sm text-uppercase">
+                                                    <%= u.name.charAt(0) %>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark"><%= u.name %></div>
+                                                    <div class="small text-muted"><%= u.email %></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <% 
+                                                let badgeClass = 'bg-primary';
+                                                if(u.role === 'admin') badgeClass = 'bg-danger';
+                                                else if(u.role === 'manager') badgeClass = 'bg-warning text-dark';
+                                            %>
+                                            <span class="badge rounded-pill <%= badgeClass %> badge-role shadow-sm border">
+                                                <%= u.role.toUpperCase() %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small">
+                                                <i class="bi bi-calendar-check me-1"></i> 
+                                                <%= u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : 'N/A' %>
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <% if (u.id !== user.id) { %>
+                                                <div class=" shadow-sm">
+                                                    <a href="/admin/users/edit/<%= u.id %>" class="btn btn-sm btn-outline-primary btn-action" title="Sửa thông tin">
+                                                        <i class="bi bi-pencil-square"></i> Sửa
+                                                    </a>
+                                                    <form action="/admin/users/delete/<%= u.id %>" method="POST" class="d-inline m-0">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-action border-start-0" 
+                                                                onclick="return confirm('Sếp chắc chắn muốn xóa vĩnh viễn tay này?')">
+                                                            <i class="bi bi-trash3"></i> Xóa
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            <% } else { %>
+                                                <span class="badge bg-light text-secondary border px-3 py-2 shadow-sm small">
+                                                    <i class="bi bi-person-bounding-box me-1"></i> Đang là sếp
+                                                </span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <i class="bi bi-person-x text-muted opacity-25" style="font-size: 4rem;"></i>
+                                        <p class="mt-2 text-muted fw-bold">Chưa có dữ liệu thành viên nào!</p>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-5 text-center">
+            <small class="text-muted text-uppercase fw-lighter" style="letter-spacing: 2px;">Hệ thống quản trị Blog Node.js - Secure by Bcrypt & JWT</small>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

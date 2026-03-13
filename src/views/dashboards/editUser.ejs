@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa thành viên - <%= user.name %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .hash-font { font-family: monospace; font-size: 0.85rem; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-primary text-white py-3 rounded-top-4">
+                        <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Cập nhật: <%= user.name %></h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/admin/users/update/<%= user.id %>" method="POST">
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Địa chỉ Email</label>
+                                <input type="email" name="email" class="form-control" value="<%= user.email %>" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tên hiển thị</label>
+                                <input type="text" name="name" class="form-control" value="<%= user.name %>" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mật khẩu hiện tại (Dạng mã hóa)</label>
+                                <input type="text" class="form-control bg-light text-muted hash-font" 
+                                       value="<%= user.password %>" readonly>
+                                <small class="text-muted small">Đây là chuỗi Hash bảo mật trong Database.</small>
+                            </div>
+
+                            <div class="mb-4 p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
+                                <label class="form-label fw-bold text-success"><i class="bi bi-key-fill"></i> Đổi mật khẩu mới</label>
+                                <input type="password" name="password" class="form-control border-success" 
+                                       placeholder="Để trống nếu không muốn đổi...">
+                                <div class="form-text text-success small">Nếu nhập, hệ thống sẽ tự động mã hóa lại</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Quyền hạn (Role)</label>
+                                <select name="role" class="form-select border-primary shadow-sm">
+                                    <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>User</option>
+                                    <option value="manager" <%= user.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                                    <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                    <option value="editor" <%= user.role === 'editor' ? 'selected' : '' %>>Editor</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success fw-bold py-2 shadow-sm">
+                                    <i class="bi bi-save"></i> LƯU THAY ĐỔI
+                                </button>
+                                <a href="/admin/users" class="btn btn-outline-secondary py-2">Quay lại</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
