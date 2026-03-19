@@ -1,14 +1,24 @@
 const { Post, User, Category, PostAnalytics, Tag } = require("../models/index");
 class PostService {
-  // src/services/postService.js
   async getAll() {
     return await Post.findAll({
       include: [
         { model: User, as: "author", attributes: ["name"] },
         { model: Category, as: "category", attributes: ["name"] },
-        // Đảm bảo as: "tags" viết thường y hệt như này sếp nhé
         { model: Tag, as: "tags", attributes: ["name"] },
         { model: PostAnalytics, as: "stats" },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+  }
+  // src/services/postService.js
+  async getPublishedPosts() {
+    return await Post.findAll({
+      where: { status: "approved" }, // Chỉ lấy bài đã lên sóng
+      include: [
+        { model: User, as: "author", attributes: ["name"] },
+        { model: Category, as: "category" },
+        { model: Tag, as: "tags" },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -21,11 +31,23 @@ class PostService {
       where: { id: id },
     });
   }
-  // Thêm vào trong class PostService
   async updateStatus(id, status) {
     return await Post.update({ status }, { where: { id } });
   }
-  // Thêm vào trong class PostService sếp nhé
+  async getDetail(slug) {
+    return await Post.findOne({
+      where: { slug: slug, status: "approved" },
+      include: [
+        { model: User, as: "author", attributes: ["name"] },
+        { model: Tag, as: "tags" },
+        {
+          model: Comment,
+          as: "comments",
+          include: [{ model: User, as: "author", attributes: ["name"] }], // Lấy luôn tên người cmt
+        },
+      ],
+    });
+  }
   async getPendingPosts() {
     return await Post.findAll({
       where: { status: "pending" }, // Chỉ lấy bài chờ duyệt

@@ -1,0 +1,35 @@
+<div class="comments-section mt-5 border-top pt-4">
+    <h4 class="fw-bold mb-4">Bình luận (<%= post.comments.length %>)</h4>
+
+    <% if (user) { %>
+        <form action="/comments/create" method="POST" class="mb-5">
+            <input type="hidden" name="post_id" value="<%= post.id %>">
+            <div class="form-floating mb-2">
+                <textarea name="content" class="form-control" style="height: 100px" required></textarea>
+                <label>Chia sẻ cảm nghĩ của sếp...</label>
+            </div>
+            <button type="submit" class="btn btn-success px-4 fw-bold">Gửi bình luận</button>
+        </form>
+    <% } else { %>
+        <div class="alert alert-light border">
+            Vui lòng <a href="/login" class="text-success fw-bold">Đăng nhập</a> để tham gia thảo luận sếp nhé!
+        </div>
+    <% } %>
+
+    <div class="comment-list">
+        <% post.comments.forEach(cmt => { %>
+            <div class="d-flex mb-4">
+                <div class="flex-shrink-0">
+                    <img src="https://ui-avatars.com/api/?name=<%= cmt.author.name %>" class="rounded-circle" width="40">
+                </div>
+                <div class="ms-3 p-3 bg-white rounded-3 shadow-sm flex-grow-1">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-1 fw-bold"><%= cmt.author.name %></h6>
+                        <small class="text-muted"><%= new Date(cmt.createdAt).toLocaleDateString('vi-VN') %></small>
+                    </div>
+                    <p class="mb-0 text-secondary"><%= cmt.content %></p>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
