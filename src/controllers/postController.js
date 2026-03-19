@@ -1,5 +1,6 @@
 const postService = require("../services/postService");
 const categoryService = require("../services/categoryService");
+const { Tag } = require("../models");
 const slugify = require("slugify");
 
 exports.getAll = async (req, res) => {
@@ -31,33 +32,55 @@ exports.getCreateForm = async (req, res) => {
 };
 exports.create = async (req, res) => {
   try {
+    const { title, content, category_id, tags } = req.body;
     const imagePath = req.file ? `/uploads/posts/${req.file.filename}` : "";
 
-    console.log("--> req.file:", req.file);
-
     const postData = {
-      title: req.body.title,
-      content: req.body.content,
+      title,
+      content,
       slug:
-        slugify(String(req.body.title), { lower: true, strict: true }) +
+        slugify(String(title), { lower: true, strict: true }) +
         "-" +
         Date.now(),
-      image: imagePath, // ← lấy từ req.file, không phải req.body
-      categoryId: req.body.category_id,
+      image: imagePath,
+      categoryId: category_id,
       userId: req.user.id,
       status: "pending",
     };
 
-    console.log("POST DATA:", postData);
-    await postService.create(postData);
+    // 1. CHỈ GỌI CREATE 1 LẦN DUY NHẤT VÀ HỨNG VÀO BIẾN post
+    const post = await postService.create(postData);
+
+    // 2. XỬ LÝ TAGS (Gắn vào đúng cái post vừa tạo bên trên)
+    if (tags && tags.trim() !== "") {
+      const tagNames = tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t !== "");
+      const tagInstances = [];
+
+      for (const name of tagNames) {
+        // findOrCreate giúp không bị trùng tag trong bảng tags
+        const [tag] = await Tag.findOrCreate({ where: { name: name } });
+        tagInstances.push(tag);
+      }
+
+      // Lệnh này sẽ ghi dữ liệu vào bảng post_tag
+      await post.setTags(tagInstances);
+      console.log(
+        `✅ Đã lưu ${tagInstances.length} tags cho bài ID: ${post.id}`,
+      );
+    }
+
+    // 3. ĐIỀU HƯỚNG VỀ (BẮT BUỘC: Không được gọi await postService.create nữa)
     res.redirect("/admin/posts");
   } catch (error) {
-    console.error("LOI TAO BAI:", error.message);
+    console.error("❌ LỖI LƯU TAG:", error.message);
     const categories = await categoryService.getAll();
     res.render("dashboards/createPost", {
       categories,
       user: req.user,
-      error: "Loi tao bai: " + error.message,
+      error: "Lỗi: " + error.message,
     });
   }
 };

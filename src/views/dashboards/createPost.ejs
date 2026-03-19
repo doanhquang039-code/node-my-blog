@@ -40,25 +40,36 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label class="form-label">Danh mục</label>
-                        <select name="category_id" class="form-select">
-                            <% if (categories && categories.length > 0) { %>
-                                <% categories.forEach(cat => { %>
-                                    <option value="<%= cat.id %>"><%= cat.name %></option>
-                                <% }) %>
-                            <% } %>
-                        </select>
-                    </div>
+    <div class="col-md-6 mb-4">
+        <label class="form-label">Danh mục</label>
+        <select name="category_id" class="form-select">
+            <% if (categories && categories.length > 0) { %>
+                <% categories.forEach(cat => { %>
+                    <option value="<%= cat.id %>"><%= cat.name %></option>
+                <% }) %>
+            <% } %>
+        </select>
+    </div>
 
-                    <div class="col-md-6 mb-4">
-                        <label class="form-label">Ảnh đại diện bài viết</label>
-                        <input type="file" name="image" class="form-control" id="imageInput" accept="image/*" required>
-                        <div class="mt-2 text-center">
-                            <img id="preview" src="#" alt="Xem trước ảnh" class="img-thumbnail d-none" style="max-height: 150px;">
-                        </div>
-                    </div>
-                </div>
+    <div class="col-md-6 mb-4">
+        <label class="form-label">Ảnh đại diện bài viết</label>
+        <input type="file" name="image" class="form-control" id="imageInput" accept="image/*" required>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label text-success fw-bold"><i class="bi bi-tags-fill"></i> Gắn thẻ bài viết (Tags)</label>
+    <div class="input-group">
+        <span class="input-group-text bg-success text-white border-0"><i class="bi bi-hash"></i></span>
+        <input type="text" name="tags" class="form-control" 
+               placeholder="Ví dụ: nodejs, express, lap-trinh (cách nhau bằng dấu phẩy)">
+    </div>
+    <div class="form-text">Mẹo: Nhập các tag cách nhau bởi dấu phẩy sếp nhé!</div>
+</div>
+
+<div class="mb-4 text-center">
+    <img id="preview" src="#" alt="Xem trước ảnh" class="img-thumbnail d-none" style="max-height: 200px; border-radius: 15px;">
+</div>
 
                 <div class="mb-4">
                     <label class="form-label">Nội dung</label>

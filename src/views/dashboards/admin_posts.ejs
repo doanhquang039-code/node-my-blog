@@ -77,12 +77,22 @@
                                     <% } %>
                                 </td>
 
-                                <td>
-                                    <div class="fw-bold post-title"><%= p.title %></div>
-                                    <div class="text-muted small" style="font-family: monospace; font-size: 0.75rem;">
-                                        /<%= p.slug || 'chua-co-slug' %>
-                                    </div>
-                                </td>
+                       <<td>
+    <div class="fw-bold post-title"><%= p.title %></div>
+    <div class="text-muted small mb-2">/<%= p.slug %></div>
+    
+    <div class="d-flex flex-wrap gap-1">
+        <% if (p.tags && p.tags.length > 0) { %>
+            <% p.tags.forEach(t => { %>
+                <span class="badge bg-light text-success border border-success-subtle" style="font-size: 0.65rem;">
+                    #<%= t.name %>
+                </span>
+            <% }) %>
+        <% } else { %>
+            <span class="text-muted" style="font-size: 0.65rem;">Chưa gắn thẻ</span>
+        <% } %>
+    </div>
+</td>
 
                                 <td>
                                     <div class="small"><i class="bi bi-person-circle me-1"></i><%= p.author ? p.author.name : 'Ẩn danh' %></div>
