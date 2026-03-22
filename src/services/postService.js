@@ -38,6 +38,16 @@ class PostService {
       where: { id: id },
     });
   }
+  async update(id, data) {
+    try {
+      const post = await Post.findByPk(id);
+      if (!post) throw new Error("Không tìm thấy bài viết để cập nhật");
+      return await post.update(data);
+    } catch (error) {
+      console.error("Lỗi update bài viết trong Service:", error.message);
+      throw error;
+    }
+  }
   async updateStatus(id, status) {
     return await Post.update({ status }, { where: { id } });
   }
@@ -69,19 +79,37 @@ class PostService {
     try {
       const post = await Post.findByPk(id, {
         include: [
-          { model: User, as: "author", attributes: ["name"] },
+          // 1. Lấy thông tin tác giả bài viết
+          { model: User, as: "author", attributes: ["id", "name", "role"] },
+
+          // 2. Lấy danh mục bài viết
           { model: Category, as: "category", attributes: ["name"] },
-          { model: Tag, as: "tags", through: { attributes: [] } }, // Thêm thuộc tính này để lấy data sạch
+
+          // 3. Lấy danh sách Tags (data sạch không kèm bảng trung gian)
+          { model: Tag, as: "tags", through: { attributes: [] } },
+
+          // 4. Lấy thống kê lượt xem/thích
           { model: PostAnalytics, as: "stats" },
+
+          // 5. QUAN TRỌNG: Lấy bình luận và người bình luận
+          {
+            model: Comment,
+            as: "comments",
+            include: [
+              { model: User, as: "author", attributes: ["name"] }, // Lấy tên người cmt
+            ],
+          },
         ],
+        // Sắp xếp bình luận mới nhất lên đầu cho sếp dễ đọc
+        order: [[{ model: Comment, as: "comments" }, "id", "DESC"]],
       });
+
       console.log(
-        `==> Kiểm tra bài ID ${id} có bao nhiêu tags:`,
-        post?.tags?.length || 0,
+        `==> Check bài ID ${id}: Tags(${post?.tags?.length || 0}), Comments(${post?.comments?.length || 0})`,
       );
       return post;
     } catch (error) {
-      console.error("Lỗi getById:", error.message);
+      console.error("Lỗi getById chi tiết:", error.message);
       throw error;
     }
   }
