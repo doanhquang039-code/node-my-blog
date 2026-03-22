@@ -46,4 +46,41 @@ router.post(
   roleMiddleware(["admin"]),
   postController.delete,
 );
+router.get(
+  "/export/excel",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  postController.exportPostsExcel,
+);
+router.get(
+  "/export/pdf",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  postController.exportPostsPDF,
+);
+router.get("/view/:id", authMiddleware, postController.getPostDetail);
+router.get("/edit/:id", authMiddleware, postController.getEditForm);
+router.post(
+  "/edit/:id",
+  authMiddleware,
+  upload.single("image"),
+  postController.updatePost,
+);
+router.post(
+  "/edit/:id",
+  authMiddleware,
+  (req, res, next) => {
+    console.log("✅ ROUTE POST /edit/:id được gọi, ID:", req.params.id);
+    next();
+  },
+  upload.single("image"),
+  (req, res, next) => {
+    console.log(
+      "✅ QUA UPLOAD MIDDLEWARE, file:",
+      req.file ? "có file" : "không có file",
+    );
+    next();
+  },
+  postController.updatePost,
+);
 module.exports = router;

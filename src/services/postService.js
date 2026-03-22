@@ -1,4 +1,11 @@
-const { Post, User, Category, PostAnalytics, Tag } = require("../models/index");
+const {
+  Post,
+  User,
+  Category,
+  PostAnalytics,
+  Tag,
+  Comment,
+} = require("../models/index");
 class PostService {
   async getAll() {
     return await Post.findAll({
@@ -59,13 +66,24 @@ class PostService {
     });
   }
   async getById(id) {
-    return await Post.findByPk(id, {
-      include: [
-        { model: User, as: "author", attributes: ["name"] },
-        { model: Category, as: "category", attributes: ["name"] },
-      ],
-    });
+    try {
+      const post = await Post.findByPk(id, {
+        include: [
+          { model: User, as: "author", attributes: ["name"] },
+          { model: Category, as: "category", attributes: ["name"] },
+          { model: Tag, as: "tags", through: { attributes: [] } }, // Thêm thuộc tính này để lấy data sạch
+          { model: PostAnalytics, as: "stats" },
+        ],
+      });
+      console.log(
+        `==> Kiểm tra bài ID ${id} có bao nhiêu tags:`,
+        post?.tags?.length || 0,
+      );
+      return post;
+    } catch (error) {
+      console.error("Lỗi getById:", error.message);
+      throw error;
+    }
   }
 }
-
 module.exports = new PostService();

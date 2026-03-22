@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa bài viết: <%= post.title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light py-5">
+    <div class="container">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-success text-white py-3">
+                <h4 class="mb-0"><i class="bi bi-pencil-square"></i> ĐANG SỬA BÀI: <%= post.title %></h4>
+            </div>
+            <div class="card-body p-4">
+              <form action="/admin/posts/edit/<%= post.id %>" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tiêu đề bài viết</label>
+                        <input type="text" name="title" class="form-control" value="<%= post.title %>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Danh mục</label>
+                        <select name="category_id" class="form-select">
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat.id %>" <%= post.categoryId == cat.id ? 'selected' : '' %>>
+                                    <%= cat.name %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nội dung bài viết</label>
+                        <textarea name="content" class="form-control" rows="10" required><%= post.content %></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tags (cách nhau bằng dấu phẩy)</label>
+                        <input type="text" name="tags" class="form-control" 
+                               value="<%= post.tags ? post.tags.map(t => t.name).join(', ') : '' %>">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Thay đổi Ảnh/Video (Để trống nếu giữ cũ)</label>
+                        <input type="file" name="image" class="form-control">
+                        <% if(post.image) { %>
+                            <img src="<%= post.image %>" class="mt-2 rounded" style="width: 100px;">
+                        <% } %>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success fw-bold py-2">LƯU BÀI VIẾT</button>
+                        <a href="/admin/posts" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
