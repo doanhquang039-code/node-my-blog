@@ -11,18 +11,14 @@ require("./src/config/db");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "src/views"));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-// ✅ Log middleware TRƯỚC routes
 app.use((req, res, next) => {
   console.log(`🚀 Có yêu cầu: ${req.method} ${req.url}`);
   next();
 });
-
-// ✅ Mỗi route chỉ đăng ký MỘT LẦN
 app.use("/", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
@@ -31,6 +27,5 @@ app.use("/admin/posts", postRoutes);
 app.use("/comments", commentRoutes);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`🚀 Server đang chạy tại: http://localhost:${PORT}`);
+  console.log(` Server đang chạy tại: http://localhost:${PORT}`);
 });
-// ❌ Xóa hết các dòng app.use("/admin/posts"...) thừa phía dưới này

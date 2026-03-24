@@ -3,177 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Bài viết - Admin Panel</title>
+    <title>Quản lý Nội dung - Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        :root { --admin-green: #198754; --admin-shadow: 0 0 20px rgba(0,0,0,0.08); }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .table-container { border-radius: 15px; overflow: hidden; box-shadow: var(--admin-shadow); background: white; }
-        .status-badge { min-width: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .post-title { color: #2c3e50; text-decoration: none; transition: 0.2s; display: block; font-size: 1rem; }
+        :root { --admin-green: #198754; --admin-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .table-container { border-radius: 15px; background: white; box-shadow: var(--admin-shadow); border: none; overflow: hidden; }
+        .media-box { position: relative; width: 60px; height: 60px; }
+        .post-img-thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+        .video-indicator { position: absolute; bottom: -5px; right: -5px; background: var(--admin-green); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid white; }
+        .nav-pills .nav-link.active { background-color: var(--admin-green); color: white !important; }
+        .post-title { color: #2c3e50; text-decoration: none; font-weight: 600; display: block; font-size: 0.95rem; }
         .post-title:hover { color: var(--admin-green); }
-        
-        /* Media Box Styles */
-        .media-box { position: relative; width: 70px; height: 70px; }
-        .post-img-thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 1px solid #eee; }
-        .post-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 10px; color: #ccc; border: 1px dashed #ddd; }
-        
-        /* Video Indicator Overlay */
-        .video-indicator {
-            position: absolute;
-            bottom: -5px;
-            right: -5px;
-            background: var(--admin-green);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .export-btns .btn { border-radius: 8px; font-weight: 500; transition: 0.3s; }
-        .export-btns .btn:hover { transform: translateY(-2px); }
+        .top-card { border-radius: 15px; border: none; box-shadow: var(--admin-shadow); }
     </style>
 </head>
-<body class="bg-light py-4">
+<body class="py-4">
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4 p-4 bg-white rounded-4 border-start border-success border-5 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-4 p-4 bg-white rounded-4 shadow-sm border-start border-success border-5">
             <div>
-                <h2 class="fw-bold text-success mb-1"><i class="bi bi-journal-richtext"></i> QUẢN LÝ NỘI DUNG</h2>
-                <p class="text-muted mb-0">Chào sếp <strong><%= user.name %></strong>. Tổng cộng có <span class="badge bg-success"><%= posts.length %></span> bản ghi bài viết.</p>
+                <h2 class="fw-bold text-success mb-1"><i class="bi bi-journal-richtext me-2"></i>QUẢN LÝ NỘI DUNG</h2>
+                <p class="text-muted mb-0">Chào sếp <strong><%= user.name %></strong>. Có <%= approvedPosts.length + pendingPosts.length %> bài viết trên hệ thống.</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="/admin/posts/create" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
-                    <i class="bi bi-plus-circle-fill me-2"></i>Viết bài mới
+                    <i class="bi bi-plus-circle me-2"></i>Viết bài mới
                 </a>
-                <a href="/admin/users" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
-                    <i class="bi bi-people-fill me-1"></i>Thành viên
-                </a>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown">Báo cáo</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/admin/posts/export/excel">Xuất Excel</a></li>
+                        <li><a class="dropdown-item" href="/admin/posts/export/pdf">Xuất PDF</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <div class="mb-3 d-flex justify-content-between align-items-center">
-            <div class="export-btns d-flex gap-2">
-                <a href="/admin/posts/export/excel" class="btn btn-success btn-sm">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel
-                </a>
-                <a href="/admin/posts/export/pdf" class="btn btn-danger btn-sm">
-                    <i class="bi bi-file-earmark-pdf me-1"></i>Xuất PDF
-                </a>
+       <form action="/admin/posts/search" method="GET" class="d-flex mb-4">
+    <input type="text" name="author" ...>
+    <button type="submit">Tìm</button>
+</form>
+
+        <div class="row g-4">
+            <div class="col-lg-9">
+                <div class="card table-container">
+                    <div class="card-header bg-white pt-3 border-0">
+                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active rounded-pill me-2" data-bs-toggle="pill" data-bs-target="#tab-all">Tất cả</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill me-2 text-success" data-bs-toggle="pill" data-bs-target="#tab-approved">Đã đăng (<%= approvedPosts.length %>)</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill text-warning" data-bs-toggle="pill" data-bs-target="#tab-pending">Chờ duyệt (<%= pendingPosts.length %>)</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="tab-content">
+                            <% function renderTable(postList) { %>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-secondary small text-uppercase">
+                                            <tr>
+                                                <th class="ps-4">Media</th>
+                                                <th>Nội dung</th>
+                                                <th>Tác giả</th>
+                                                <th>Thống kê</th>
+                                                <th>Trạng thái</th>
+                                                <th class="text-end pe-4">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (postList.length > 0) { %>
+                                                <% postList.forEach(p => { %>
+                                                    <tr>
+                                                        <td class="ps-4">
+                                                            <div class="media-box">
+                                                                <img src="<%= p.image || 'https://via.placeholder.com/150' %>" class="post-img-thumb">
+                                                                <% if(p.video) { %><div class="video-indicator"><i class="bi bi-play-fill"></i></div><% } %>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/admin/posts/view/<%= p.id %>" class="post-title"><%= p.title %></a>
+                                                            <small class="text-muted"><%= p.category ? p.category.name : 'Mặc định' %></small>
+                                                        </td>
+                                                        <td>
+                                                            <div class="small fw-bold"><%= p.author ? p.author.name : 'Ẩn danh' %></div>
+                                                            <div class="text-muted small"><%= p.createdAt ? new Date(p.createdAt).toLocaleDateString('vi-VN') : '' %></div>
+                                                        </td>
+                                                        <td>
+                                                            <small class="d-block text-primary"><i class="bi bi-eye"></i> <%= p.stats ? p.stats.view_count : 0 %></small>
+                                                            <small class="d-block text-danger"><i class="bi bi-heart-fill"></i> <%= p.stats ? p.stats.like_count : 0 %></small>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge rounded-pill <%= p.status === 'approved' ? 'bg-success' : 'bg-warning text-dark' %>" style="font-size: 0.65rem;">
+                                                                <%= p.status === 'approved' ? 'ĐÃ ĐĂNG' : 'CHỜ DUYỆT' %>
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-end pe-4">
+                                                            <div class="btn-group">
+                                                                <% if (p.status === 'pending' && (user.role === 'admin' || user.role === 'manager')) { %>
+                                                                    <form action="/admin/posts/approve/<%= p.id %>" method="POST" class="d-inline">
+                                                                        <input type="hidden" name="action" value="approved">
+                                                                        <button type="submit" class="btn btn-sm btn-light text-success border-end"><i class="bi bi-check-lg"></i></button>
+                                                                    </form>
+                                                                <% } %>
+                                                                <a href="/admin/posts/view/<%= p.id %>" class="btn btn-sm btn-light border-end"><i class="bi bi-eye"></i></a>
+                                                                <a href="/admin/posts/edit/<%= p.id %>" class="btn btn-sm btn-light text-primary border-end"><i class="bi bi-pencil"></i></a>
+                                                                <form action="/admin/posts/delete/<%= p.id %>" method="POST" onsubmit="return confirm('Xóa nhé sếp?')">
+                                                                    <button type="submit" class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button>
+                                                                </form>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <tr><td colspan="6" class="text-center py-5 text-muted">Không có bài viết nào.</td></tr>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } %>
+
+                            <div class="tab-pane fade show active" id="tab-all">
+                                <% renderTable([...approvedPosts, ...pendingPosts]) %>
+                            </div>
+                            <div class="tab-pane fade" id="tab-approved">
+                                <% renderTable(approvedPosts) %>
+                            </div>
+                            <div class="tab-pane fade" id="tab-pending">
+                                <% renderTable(pendingPosts) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="card top-card overflow-hidden">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-fire text-danger me-2"></i>BÀI VIẾT HOT NHẤT</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <% if(typeof topLiked !== 'undefined' && topLiked.length > 0) { %>
+                            <% topLiked.forEach((p, i) => { %>
+                                <div class="list-group-item py-3">
+                                    <div class="d-flex align-items-start">
+                                        <span class="badge bg-light text-dark me-2">#<%= i+1 %></span>
+                                        <div class="overflow-hidden">
+                                            <a href="/admin/posts/view/<%= p.id %>" class="text-dark text-decoration-none small fw-bold d-block text-truncate"><%= p.title %></a>
+                                            <div class="text-danger small" style="font-size: 0.75rem;">
+                                                <i class="bi bi-heart-fill me-1"></i><%= p.stats ? p.stats.like_count : 0 %> Tim
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="p-4 text-center text-muted small">Chưa có bài viết nổi bật.</div>
+                        <% } %>
+                    </div>
+                </div>
             </div>
         </div>
-
-       <div class="card border-0 table-container">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-secondary">
-                <tr>
-                    <th class="ps-4" style="width: 80px">Media</th>
-                    <th style="width: 25%">Bài viết</th>
-                    <th style="width: 15%">Phân loại</th>
-                    <th style="width: 15%">Tác giả</th>
-                    <th style="width: 10%">Thống kê</th>
-                    <th style="width: 12%">Trạng thái</th>
-                    <th style="width: 13%">Thời gian</th>
-                    <th class="text-end pe-4" style="width: 10%">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (posts && posts.length > 0) { %>
-                    <% posts.forEach(p => { %>
-                        <tr>
-                            <td class="ps-4">
-                                <div class="media-box">
-                                    <% if(p.image) { %>
-                                        <img src="<%= p.image %>" class="post-img-thumb" alt="Thumb">
-                                    <% } else { %>
-                                        <div class="post-img-empty"><i class="bi bi-image"></i></div>
-                                    <% } %>
-                                    <% if(p.video) { %>
-                                        <div class="video-indicator"><i class="bi bi-play-fill"></i></div>
-                                    <% } %>
-                                </div>
-                            </td>
-
-                           <td>
-    <a href="/admin/posts/view/<%= p.id %>" class="fw-bold post-title mb-1 text-truncate" style="max-width: 250px;">
-        <%= p.title %>
-    </a>
-    <div class="text-muted" style="font-size: 0.7rem; font-family: monospace;">
-        <i class="bi bi-link-45deg"></i><%= p.slug %>
-    </div>
-</td>
-
-                            <td>
-                                <div class="mb-1">
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.7rem;">
-                                        <i class="bi bi-folder2 me-1"></i><%= p.category ? p.category.name : 'Mặc định' %>
-                                    </span>
-                                </div>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <% if(p.video) { %>
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.6rem;">VIDEO</span>
-                                    <% } %>
-                                    <% if (p.tags && p.tags.length > 0) { %>
-                                        <% p.tags.forEach(t => { %>
-                                            <span class="text-success small" style="font-size: 0.7rem;">#<%= t.name %></span>
-                                        <% }) %>
-                                    <% } %>
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="small fw-semibold"><%= p.author ? p.author.name : 'Ẩn danh' %></div>
-                                <div class="text-muted small" style="font-size: 0.7rem;"><%= p.author ? p.author.role : '' %></div>
-                            </td>
-
-                            <td>
-                                <div class="small text-muted"><i class="bi bi-eye me-1"></i><%= p.stats ? p.stats.view_count : 0 %></div>
-                                <div class="small text-muted"><i class="bi bi-chat-left-text me-1"></i><%= p.comments ? p.comments.length : 0 %></div>
-                            </td>
-
-                            <td>
-                                <% if(p.status === 'pending') { %>
-                                    <span class="badge bg-warning text-dark border border-warning w-100" style="font-size: 0.65rem;">Chờ duyệt</span>
-                                <% } else { %>
-                                    <span class="badge bg-success border border-success w-100" style="font-size: 0.65rem;">Đã đăng</span>
-                                <% } %>
-                            </td>
-
-                            <td>
-                                <div class="small fw-medium"><%= p.createdAt ? new Date(p.createdAt).toLocaleDateString('vi-VN') : '' %></div>
-                                <div class="text-muted" style="font-size: 0.7rem;"><%= p.createdAt ? new Date(p.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : '' %></div>
-                            </td>
-
-                            <td class="text-end pe-4">
-                                <div class="btn-group">
-                                    <% if (p.status === 'pending' && (user.role === 'admin' || user.role === 'manager')) { %>
-                                        <form action="/admin/posts/approve/<%= p.id %>" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="approved">
-                                            <button type="submit" class="btn btn-sm btn-light text-success border"><i class="bi bi-check-lg"></i></button>
-                                        </form>
-                                    <% } %>
-                                    <a href="/admin/posts/view/<%= p.id %>" class="btn btn-sm btn-light text-secondary border" title="Xem chi tiết">
-            <i class="bi bi-eye"></i> </a>
-                                    <a href="/admin/posts/edit/<%= p.id %>" class="btn btn-sm btn-light text-primary border"><i class="bi bi-pencil"></i></a>
-                                    <form action="/admin/posts/delete/<%= p.id %>" method="POST" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-light text-danger border" onclick="return confirm('Xóa hả sếp?')"><i class="bi bi-trash"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    <% }) %>
-                <% } %>
-            </tbody>
-        </table>
-    </div>
-</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

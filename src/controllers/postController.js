@@ -4,20 +4,38 @@ const { Tag } = require("../models");
 const reportService = require("../services/reportService");
 const slugify = require("slugify");
 const axios = require("axios");
+
 exports.getAll = async (req, res) => {
   try {
-    let posts;
-    if (
-      req.user.role === "admin" ||
-      req.user.role === "manager" ||
-      req.user.role === "editor" ||
-      req.user.role === "user"
-    ) {
-      posts = await postService.getAll();
-    } else {
-      posts = await postService.getPostsByUser(req.user.id);
+    const allPosts = await postService.getAll();
+    const approvedPosts = allPosts.filter((p) => p.status === "approved");
+    const pendingPosts = allPosts.filter((p) => p.status === "pending");
+    const topLiked = [...approvedPosts]
+      .sort((a, b) => (b.stats?.like_count || 0) - (a.stats?.like_count || 0))
+      .slice(0, 5);
+    res.render("dashboards/admin_posts", {
+      posts: allPosts,
+      approvedPosts,
+      pendingPosts,
+      topLiked,
+      user: req.user,
+    });
+  } catch (error) {
+    console.error("Lỗi tại postController.getAll:", error.message);
+    res.status(500).send("Lỗi hệ thống: " + error.message);
+  }
+};
+// 2. Hàm xem chi tiết (Đúng logic chặn View bài chưa duyệt)
+exports.getPostDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await postService.getById(id);
+    if (!post) return res.status(404).send("Không thấy bài này!");
+    if (post.status === "approved") {
+      await postService.incrementView(id);
     }
-    res.render("dashboards/admin_posts", { posts, user: req.user });
+
+    res.render("dashboards/postDetail", { post, user: req.user });
   } catch (error) {
     res.status(500).send("Lỗi: " + error.message);
   }
@@ -28,22 +46,17 @@ exports.updatePost = async (req, res) => {
     console.log("📥 req.body nhận được:", req.body);
     console.log("📁 req.file:", req.file);
     const { title, content, category_id, tags } = req.body;
-
-    // 1. Tìm bài viết cũ (Nạp luôn tags để xử lý so sánh nếu cần)
     const post = await postService.getById(id);
     if (!post) {
       return res
         .status(404)
         .render("errors/404", { message: "Bài viết không tồn tại sếp ơi!" });
     }
-
-    // 2. Xử lý File (Ảnh/Video) - Nếu không upload mới thì giữ nguyên cái cũ
     let imagePath = post.image;
     let videoPath = post.video;
 
     if (req.file) {
       const cloudUrl = req.file.path;
-      // Phân loại nhanh dựa trên URL của Cloudinary
       if (cloudUrl.includes("/video/upload/")) {
         videoPath = cloudUrl;
         imagePath = ""; // Nếu đổi sang video thì xóa link ảnh
@@ -62,11 +75,7 @@ exports.updatePost = async (req, res) => {
     if (title && title !== post.title) {
       updatedData.slug = slugify(title, { lower: true }) + "-" + Date.now();
     }
-
-    // 4. Thực thi cập nhật vào Database
     await post.update(updatedData);
-
-    // 5. Cập nhật mối quan hệ Tags (N-N)
     if (typeof tags !== "undefined") {
       // Kiểm tra nếu có gửi field tags lên
       const tagNames = tags
@@ -264,25 +273,46 @@ exports.exportPostsExcel = async (req, res) => {
     res.status(500).send("Lỗi xuất Excel: " + error.message);
   }
 };
-exports.getPostDetail = async (req, res) => {
+exports.searchPosts = async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log("==> Bước 1: Đang tìm bài viết ID:", id);
-    const post = await postService.getById(id);
-    console.log(
-      "==> Bước 2: Kết quả tìm kiếm:",
-      post ? "Tìm thấy" : "KHÔNG thấy",
-    );
-    if (!post) {
-      return res
-        .status(404)
-        .send("Lỗi: Không tìm thấy bài viết trong database!");
-    }
-    console.log("==> Bước 3: Đang render giao diện...");
-    res.render("dashboards/postDetail", { post, user: req.user });
+    const { author } = req.query;
+    // 1. Lọc kết quả tìm kiếm cho tab "Tất cả"
+    const searchResults = await postService.searchByAuthorName(author);
+
+    // 2. Phải lấy thêm toàn bộ để chia tab Approved/Pending
+    const allPosts = await postService.getAll();
+    const approvedPosts = allPosts.filter((p) => p.status === "approved");
+    const pendingPosts = allPosts.filter((p) => p.status === "pending");
+    const topLiked = approvedPosts
+      .sort((a, b) => (b.stats?.like_count || 0) - (a.stats?.like_count || 0))
+      .slice(0, 5);
+
+    res.render("dashboards/admin_posts", {
+      posts: searchResults, // Tab tất cả hiện kết quả search
+      approvedPosts,
+      pendingPosts,
+      topLiked,
+      user: req.user,
+    });
   } catch (error) {
-    console.error("==> LỖI CỰC NẶNG:", error.message);
-    res.status(500).send("Lỗi Server: " + error.message);
+    res.status(500).send("Lỗi tìm kiếm: " + error.message);
+  }
+};
+exports.getHotPosts = async (req, res) => {
+  try {
+    const { sortBy } = req.query; // 'view_count' hoặc 'like_count'
+    const posts = await postService.getTopApprovedPosts(sortBy);
+
+    res.render("dashboards/admin_posts", {
+      posts,
+      user: req.user,
+      title:
+        sortBy === "like_count"
+          ? "Bài viết nhiều Like nhất"
+          : "Bài viết nhiều View nhất",
+    });
+  } catch (error) {
+    res.status(500).send("Lỗi sắp xếp: " + error.message);
   }
 };
 exports.exportPostsPDF = async (req, res) => {
@@ -355,4 +385,16 @@ exports.getEditForm = async (req, res) => {
   const post = await postService.getById(req.params.id);
   const categories = await categoryService.getAll();
   res.render("dashboards/editPost", { post, categories, user: req.user });
+};
+// Tìm và thay thế các đoạn getPostDetail và likePost cũ bằng đoạn này:
+
+exports.likePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await postService.incrementLike(id);
+    const backURL = req.get("Referer") || `/admin/posts/view/${id}`;
+    res.redirect(backURL);
+  } catch (error) {
+    res.status(500).send("Lỗi like bài: " + error.message);
+  }
 };

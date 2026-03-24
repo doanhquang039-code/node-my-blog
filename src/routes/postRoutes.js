@@ -59,7 +59,9 @@ router.get(
   postController.exportPostsPDF,
 );
 router.get("/view/:id", authMiddleware, postController.getPostDetail);
+router.post("/like/:id", authMiddleware, postController.likePost);
 router.get("/edit/:id", authMiddleware, postController.getEditForm);
+
 router.post(
   "/edit/:id",
   authMiddleware,
@@ -83,4 +85,6 @@ router.post(
   },
   postController.updatePost,
 );
+router.get("/search", authMiddleware, postController.searchPosts);
+router.get("/hot", authMiddleware, postController.getHotPosts);
 module.exports = router;

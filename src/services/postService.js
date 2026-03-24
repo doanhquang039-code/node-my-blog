@@ -6,6 +6,7 @@ const {
   Tag,
   Comment,
 } = require("../models/index");
+const { Op } = require("sequelize");
 class PostService {
   async getAll() {
     return await Post.findAll({
@@ -18,10 +19,9 @@ class PostService {
       order: [["createdAt", "DESC"]],
     });
   }
-  // src/services/postService.js
   async getPublishedPosts() {
     return await Post.findAll({
-      where: { status: "approved" }, // Chỉ lấy bài đã lên sóng
+      where: { status: "approved" },
       include: [
         { model: User, as: "author", attributes: ["name"] },
         { model: Category, as: "category" },
@@ -67,7 +67,7 @@ class PostService {
   }
   async getPendingPosts() {
     return await Post.findAll({
-      where: { status: "pending" }, // Chỉ lấy bài chờ duyệt
+      where: { status: "pending" },
       include: [
         { model: User, as: "author", attributes: ["name"] },
         { model: Category, as: "category", attributes: ["name"] },
@@ -75,23 +75,50 @@ class PostService {
       order: [["createdAt", "DESC"]],
     });
   }
+
+  // 1. Tăng lượt xem (Dùng findOrCreate để tránh lỗi nếu chưa có dòng data nào)
+  async incrementView(postId) {
+    // Chỉ tìm bài viết nếu nó đã được 'approved'
+    const post = await Post.findOne({
+      where: { id: postId, status: "approved" },
+    });
+    if (!post) return null; // Bài chưa duyệt thì nghỉ, không tăng view
+
+    const [analytics, created] = await PostAnalytics.findOrCreate({
+      where: { post_id: postId },
+      defaults: { view_count: 1 },
+    });
+    if (!created) {
+      await analytics.increment("view_count", { by: 1 });
+    }
+    return analytics;
+  }
+
+  async incrementLike(postId) {
+    // Tương tự, chỉ cho like bài đã duyệt
+    const post = await Post.findOne({
+      where: { id: postId, status: "approved" },
+    });
+    if (!post)
+      throw new Error("Bài viết chưa được công khai, không thể like sếp ơi!");
+
+    const [analytics, created] = await PostAnalytics.findOrCreate({
+      where: { post_id: postId },
+      defaults: { like_count: 1 },
+    });
+    if (!created) {
+      await analytics.increment("like_count", { by: 1 });
+    }
+    return analytics;
+  }
   async getById(id) {
     try {
       const post = await Post.findByPk(id, {
         include: [
-          // 1. Lấy thông tin tác giả bài viết
           { model: User, as: "author", attributes: ["id", "name", "role"] },
-
-          // 2. Lấy danh mục bài viết
           { model: Category, as: "category", attributes: ["name"] },
-
-          // 3. Lấy danh sách Tags (data sạch không kèm bảng trung gian)
           { model: Tag, as: "tags", through: { attributes: [] } },
-
-          // 4. Lấy thống kê lượt xem/thích
           { model: PostAnalytics, as: "stats" },
-
-          // 5. QUAN TRỌNG: Lấy bình luận và người bình luận
           {
             model: Comment,
             as: "comments",
@@ -100,7 +127,6 @@ class PostService {
             ],
           },
         ],
-        // Sắp xếp bình luận mới nhất lên đầu cho sếp dễ đọc
         order: [[{ model: Comment, as: "comments" }, "id", "DESC"]],
       });
 
@@ -112,6 +138,40 @@ class PostService {
       console.error("Lỗi getById chi tiết:", error.message);
       throw error;
     }
+  }
+  async searchByAuthorName(authorName) {
+    return await Post.findAll({
+      include: [
+        {
+          model: User,
+          as: "author",
+          where: {
+            name: { [Op.like]: `%${authorName}%` },
+          },
+          attributes: ["id", "name", "role"],
+        },
+        { model: Category, as: "category", attributes: ["name"] },
+        { model: PostAnalytics, as: "stats" },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+  }
+  // 2. Sắp xếp bài viết ĐÃ DUYỆT theo View hoặc Like nhiều nhất
+  async getTopApprovedPosts(type = "view_count", limit = 10) {
+    return await Post.findAll({
+      where: { status: "approved" },
+      include: [
+        { model: User, as: "author", attributes: ["name"] },
+        { model: Category, as: "category", attributes: ["name"] },
+        {
+          model: PostAnalytics,
+          as: "stats",
+          required: true, // Chỉ lấy những bài đã có bản ghi stats
+        },
+      ],
+      order: [[{ model: PostAnalytics, as: "stats" }, type, "DESC"]],
+      limit: limit,
+    });
   }
 }
 module.exports = new PostService();
