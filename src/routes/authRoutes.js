@@ -4,7 +4,7 @@ const categoryService = require("../services/categoryService");
 const authController = require("../controllers/authController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
-
+router.post("/register", authController.register);
 // --- VIEW ROUTES ---
 router.get("/", (req, res) => res.render("index"));
 router.get("/login", (req, res) => res.render("login"));
@@ -16,10 +16,10 @@ router.get(
   roleMiddleware(["admin"]),
   async (req, res) => {
     try {
-      const categories = await categoryService.getAll(); // Phải lấy dữ liệu ở đây
+      const categories = await categoryService.getAll(); // Phải gọi hàm này
       res.render("dashboards/admin", {
         user: req.user,
-        categories: categories, // Phải truyền biến này vào view
+        categories: categories,
       });
     } catch (error) {
       res.status(500).send("Lỗi tải dữ liệu");
@@ -31,7 +31,7 @@ router.get(
   authMiddleware,
   roleMiddleware(["admin", "manager"]),
   (req, res) => {
-    res.render("dashboards/manager", { user: req.user });
+    res.render("dashboards_manager/manager", { user: req.user });
   },
 );
 
@@ -40,15 +40,14 @@ router.get(
   authMiddleware,
   roleMiddleware(["admin", "editor"]),
   (req, res) => {
-    res.render("dashboards/editor", { user: req.user });
+    res.render("dashboards_editor/editor", { user: req.user });
   },
 );
 
 router.get("/user", authMiddleware, (req, res) => {
-  res.render("dashboards/user", { user: req.user });
+  res.render("dashboards_user/user", { user: req.user });
 });
 
-// --- API ROUTES ---
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 // src/routes/authRoutes.js

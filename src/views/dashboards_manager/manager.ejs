@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manager Dashboard - Hệ thống quản trị</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <style>
+      .sidebar-manager {
+        background: #212529;
+        min-height: 100vh;
+        color: white;
+      }
+      .main-content {
+        background: #f4f7f6;
+        min-height: 100vh;
+      }
+      .card-stats {
+        border-left: 5px solid #0d6efd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2 sidebar-manager p-3">
+          <h4 class="text-center mb-4">MANAGER</h4>
+          <hr />
+          <ul class="nav flex-column gap-2">
+            <li class="nav-item">
+              <a href="/manager" class="nav-link text-white active"
+                ><i class="bi bi-speedometer2 me-2"></i>Tổng quan</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="/admin/posts" class="nav-link text-white"
+                ><i class="bi bi-journal-text me-2"></i>Duyệt bài viết</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link text-danger"
+                ><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-md-10 main-content p-4">
+          <div class="d-flex justify-content-between mb-4">
+            <h3>Bảng điều khiển quản lý</h3>
+            <span class="text-muted">Xin chào, <%= user.name %></span>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="card card-stats p-3 shadow-sm">
+                <small class="text-muted uppercase">Bài viết chờ duyệt</small>
+                <h2 class="fw-bold">12</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card card-stats p-3 shadow-sm border-success">
+                <small class="text-muted">Bình luận mới</small>
+                <h2 class="fw-bold text-success">45</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">
+              Yêu cầu phê duyệt mới nhất
+            </div>
+            <div class="card-body">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Tiêu đề</th>
+                    <th>Tác giả</th>
+                    <th>Ngày gửi</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Cách học Node.js thần tốc</td>
+                    <td>Editor_A</td>
+                    <td>20/03/2026</td>
+                    <td>
+                      <a href="/admin/posts" class="btn btn-sm btn-primary"
+                        >Kiểm tra</a
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
