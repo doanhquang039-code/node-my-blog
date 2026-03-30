@@ -1,5 +1,6 @@
 const userService = require("../services/userService");
 const bcrypt = require("bcryptjs");
+const reportService = require("../services/reportService");
 exports.getAll = async (req, res) => {
   try {
     const allUsers = await userService.getAll();
@@ -15,22 +16,22 @@ exports.getAll = async (req, res) => {
 };
 // Trích đoạn logic gợi ý cho sếp trong userController.js
 exports.update = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, email, password, role } = req.body;
-        
-        // Tạo object chứa các thông tin cơ bản
-        let updateData = { name, email, role };
-        if (password && password.trim() !== "") {
-            const salt = await bcrypt.genSalt(10);
-            updateData.password = await bcrypt.hash(password, salt);
-        }
+  try {
+    const { id } = req.params;
+    const { name, email, password, role } = req.body;
 
-        await userService.update(id, updateData);
-        res.redirect("/admin/users");
-    } catch (error) {
-        res.status(500).send("Lỗi cập nhật: " + error.message);
+    // Tạo object chứa các thông tin cơ bản
+    let updateData = { name, email, role };
+    if (password && password.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
     }
+
+    await userService.update(id, updateData);
+    res.redirect("/admin/users");
+  } catch (error) {
+    res.status(500).send("Lỗi cập nhật: " + error.message);
+  }
 };
 exports.getById = async (req, res) => {
   try {
@@ -63,4 +64,56 @@ exports.delete = async (req, res) => {
 // Đảm bảo sếp cũng có hàm này để hiện Form
 exports.getCreateForm = (req, res) => {
   res.render("dashboards/createUser", { user: req.user });
+};
+exports.exportUsersPDF = async (req, res) => {
+  try {
+    const users = await userService.getAll(); // Đảm bảo sếp có userService.getAll()
+    const html = `
+            <html>
+            <head>
+                <style>
+                    body { font-family: DejaVu Sans, sans-serif; }
+                    h1 { text-align: center; color: #0d6efd; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                    th { background-color: #f8f9fa; }
+                </style>
+            </head>
+            <body>
+                <h1>DANH SÁCH NGƯỜI DÙNG</h1>
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Email</th>
+                        <th>Quyền</th>
+                        <th>Ngày tham gia</th>
+                    </tr>
+                    ${users
+                      .map(
+                        (u) => `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td>${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>${u.role}</td>
+                            <td>${new Date(u.createdAt).toLocaleDateString("vi-VN")}</td>
+                        </tr>
+                    `,
+                      )
+                      .join("")}
+                </table>
+            </body>
+            </html>`;
+
+    const buffer = await reportService.exportPDF(html);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=users_report.pdf",
+    );
+    res.send(buffer);
+  } catch (error) {
+    res.status(500).send("Lỗi xuất PDF người dùng: " + error.message);
+  }
 };

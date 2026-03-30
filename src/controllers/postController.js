@@ -25,6 +25,59 @@ exports.getAll = async (req, res) => {
     res.status(500).send("Lỗi hệ thống: " + error.message);
   }
 };
+exports.exportPostsPDF = async (req, res) => {
+  try {
+    const posts = await postService.getAll();
+    const html = `
+            <html>
+            <head>
+                <style>
+                    body { font-family: DejaVu Sans, sans-serif; }
+                    h1 { text-align: center; color: #198754; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+                    th { background-color: #f2f2f2; }
+                    .img-thumb { width: 50px; height: 50px; object-fit: cover; }
+                </style>
+            </head>
+            <body>
+                <h1>DANH SÁCH BÀI VIẾT</h1>
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Tác giả</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                    </tr>
+                    ${posts
+                      .map(
+                        (p) => `
+                        <tr>
+                            <td>${p.id}</td>
+                            <td>${p.title}</td>
+                            <td>${p.author ? p.author.name : "N/A"}</td>
+                            <td>${p.status}</td>
+                            <td>${new Date(p.createdAt).toLocaleDateString("vi-VN")}</td>
+                        </tr>
+                    `,
+                      )
+                      .join("")}
+                </table>
+            </body>
+            </html>`;
+
+    const buffer = await reportService.exportPDF(html);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=posts_report.pdf",
+    );
+    res.send(buffer);
+  } catch (error) {
+    res.status(500).send("Lỗi xuất PDF bài viết: " + error.message);
+  }
+};
 // 2. Hàm xem chi tiết (Đúng logic chặn View bài chưa duyệt)
 exports.getPostDetail = async (req, res) => {
   try {
@@ -77,7 +130,6 @@ exports.updatePost = async (req, res) => {
     }
     await post.update(updatedData);
     if (typeof tags !== "undefined") {
-      // Kiểm tra nếu có gửi field tags lên
       const tagNames = tags
         .split(",")
         .map((t) => t.trim())
@@ -85,7 +137,6 @@ exports.updatePost = async (req, res) => {
 
       const tagInstances = [];
       for (const name of tagNames) {
-        // findOrCreate giúp không bị tạo trùng Tag đã có trong hệ thống
         const [tag] = await Tag.findOrCreate({ where: { name: name } });
         tagInstances.push(tag);
       }

@@ -4,25 +4,47 @@ const categoryController = require("../controllers/categoryController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
 
-// Route API cho Category
+// --- 1. CÁC ROUTE TĨNH (PHẢI ĐỂ LÊN ĐẦU) ---
+
+router.get(
+  "/export/excel",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  categoryController.exportExcel,
+);
+
+router.get(
+  "/export/pdf",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  categoryController.exportPDF,
+);
+
+// --- 2. CÁC ROUTE KHÁC ---
+
 router.post(
   "/",
   authMiddleware,
   roleMiddleware(["admin", "manager"]),
   categoryController.create,
 );
+
+// --- 3. CÁC ROUTE CÓ BIẾN :id (PHẢI ĐỂ DƯỚI CÙNG) ---
+
 router.post(
   "/delete/:id",
   authMiddleware,
   roleMiddleware(["admin"]),
   categoryController.delete,
 );
+
 router.get(
   "/edit/:id",
   authMiddleware,
   roleMiddleware(["admin"]),
   categoryController.getById,
 );
+
 router.post(
   "/update/:id",
   authMiddleware,

@@ -3,6 +3,12 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
+router.get(
+  "/export/pdf",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  userController.exportUsersPDF,
+);
 router.post(
   "/delete/:id", // Thêm dấu / ở đây sếp nhé
   authMiddleware,
