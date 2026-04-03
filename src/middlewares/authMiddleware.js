@@ -1,25 +1,26 @@
 const jwt = require("jsonwebtoken");
 
-// Đặt tên hàm là authMiddleware ở đây
 const authMiddleware = (req, res, next) => {
-  const token = req.cookies.token; // Đọc token từ cookie đã cài đặt
+  const token = req.cookies.token;
 
   if (!token) {
+    console.log("❌ [Middleware]: Không thấy Token trong Cookie!");
     return res.redirect("/login");
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "secret_key_123",
-    );
+    // ✅ Dùng chung một secret với authService
+    const secret = process.env.JWT_SECRET || "SECRET_KEY_CUA_SEP";
+    const decoded = jwt.verify(token, secret);
+
     req.user = decoded;
+    console.log(`✅ [Middleware]: Auth OK! Role: ${req.user.role}`);
     next();
-  } catch (error) {
+  } catch (err) {
+    console.log("❌ [Middleware]: Token lỗi hoặc hết hạn:", err.message);
     res.clearCookie("token");
-    res.redirect("/login");
+    return res.redirect("/login");
   }
 };
 
-// Bây giờ dòng này mới có giá trị để export
 module.exports = authMiddleware;

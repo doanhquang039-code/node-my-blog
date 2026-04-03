@@ -86,6 +86,7 @@
                                                                 <% if(p.video) { %><div class="video-indicator"><i class="bi bi-play-fill"></i></div><% } %>
                                                             </div>
                                                         </td>
+                                                        <li><a class="dropdown-item" href="/admin/posts/export/pdf">Xuất PDF</a></li>
                                                         <td>
                                                             <a href="/admin/posts/view/<%= p.id %>" class="post-title"><%= p.title %></a>
                                                             <small class="text-muted"><%= p.category ? p.category.name : 'Mặc định' %></small>

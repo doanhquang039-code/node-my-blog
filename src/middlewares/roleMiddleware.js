@@ -1,13 +1,23 @@
-// src/middlewares/roleMiddleware.js
 const roleMiddleware = (allowedRoles) => {
   return (req, res, next) => {
-    // req.user được gán từ authMiddleware sau khi verify Token
     if (!req.user || !allowedRoles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .render("error", { message: "Bạn không đủ quyền hạn!" });
+      // ✅ Redirect về trang đúng role thay vì render error
+      const role = req.user?.role;
+      switch (role) {
+        case "admin":
+          return res.redirect("/admin");
+        case "manager":
+          return res.redirect("/manager");
+        case "editor":
+          return res.redirect("/editor");
+        case "user":
+          return res.redirect("/user");
+        default:
+          return res.redirect("/login");
+      }
     }
     next();
   };
 };
+
 module.exports = roleMiddleware;

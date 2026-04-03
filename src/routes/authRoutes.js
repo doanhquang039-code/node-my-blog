@@ -4,52 +4,79 @@ const categoryService = require("../services/categoryService");
 const authController = require("../controllers/authController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const roleMiddleware = require("../middlewares/roleMiddleware");
-router.post("/register", authController.register);
+const postService = require("../services/postService");
+
 // --- VIEW ROUTES ---
 router.get("/", (req, res) => res.render("index"));
 router.get("/login", (req, res) => res.render("login"));
 router.get("/register", (req, res) => res.render("register"));
-// src/routes/authRoutes.js
+
 router.get(
   "/admin",
   authMiddleware,
   roleMiddleware(["admin"]),
   async (req, res) => {
     try {
-      const categories = await categoryService.getAll(); // Phải gọi hàm này
-      res.render("dashboards/admin", {
-        user: req.user,
-        categories: categories,
-      });
+      const categories = await categoryService.getAll();
+      res.render("dashboards/admin", { user: req.user, categories });
     } catch (error) {
-      res.status(500).send("Lỗi tải dữ liệu");
+      res.status(500).send("Lỗi tải dữ liệu Admin");
     }
   },
 );
+
 router.get(
   "/manager",
   authMiddleware,
-  roleMiddleware(["admin", "manager"]),
-  (req, res) => {
-    res.render("dashboards_manager/manager", { user: req.user });
+  roleMiddleware(["manager"]), // ✅ Bỏ admin ra - admin không cần vào trang manager
+  async (req, res) => {
+    try {
+      const [posts, categories] = await Promise.all([
+        postService.getAll(),
+        categoryService.getAll(),
+      ]);
+      res.render("dashboards_manager/manager", {
+        user: req.user,
+        posts,
+        categories,
+      });
+    } catch (error) {
+      res.status(500).send("Lỗi tải dữ liệu Manager");
+    }
   },
 );
 
 router.get(
   "/editor",
   authMiddleware,
-  roleMiddleware(["admin", "editor"]),
-  (req, res) => {
-    res.render("dashboards_editor/editor", { user: req.user });
+  roleMiddleware(["editor"]), // ✅ Bỏ admin ra
+  async (req, res) => {
+    try {
+      const posts = await postService.getAll();
+      res.render("dashboards_editor/editor", { user: req.user, posts });
+    } catch (error) {
+      res.status(500).send("Lỗi tải dữ liệu Editor");
+    }
   },
 );
 
-router.get("/user", authMiddleware, (req, res) => {
-  res.render("dashboards_user/user", { user: req.user });
-});
+router.get(
+  "/user",
+  authMiddleware,
+  roleMiddleware(["user"]), // ✅ THÊM roleMiddleware - đây là lỗi chính!
+  async (req, res) => {
+    try {
+      const posts = await postService.getAll();
+      res.render("dashboards_user/user", { user: req.user, posts });
+    } catch (error) {
+      res.status(500).send("Lỗi tải dữ liệu User");
+    }
+  },
+);
 
+// ✅ Bỏ router.post("/register") trùng lặp
 router.post("/register", authController.register);
 router.post("/login", authController.login);
-// src/routes/authRoutes.js
-router.get("/logout", authMiddleware, authController.logout); // Đổi post thành get
+router.get("/logout", authMiddleware, authController.logout);
+
 module.exports = router;

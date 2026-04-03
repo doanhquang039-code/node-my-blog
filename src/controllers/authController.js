@@ -32,35 +32,26 @@ exports.login = async (req, res) => {
     res.render("login", { error: error.message });
   }
 };
-
-// Hàm register và logout
 exports.register = async (req, res) => {
   try {
-    const user = await authService.register(req.body);
-    res.status(201).json({ message: "Đăng ký thành công", data: user });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const { name, email, password, role } = req.body; // Phải có role ở đây
+    const existingUser = await userService.getByEmail(email);
+    if (existingUser) return res.status(400).send("Email này đã được sử dụng!");
 
-exports.logout = (req, res) => {
-  res.clearCookie("token"); // Xóa sạch vé khi đăng xuất
-  res.redirect("/login");
-};
-exports.register = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+    // Ép kiểu role về chữ thường để khớp với DB
+    await userService.create({
+      name,
+      email,
+      password,
+      role: role ? role.toLowerCase() : "user",
+    });
 
-    // Kiểm tra xem email đã tồn tại chưa
-    const existingUser = await userService.getByEmail(email); // Sếp cần viết thêm hàm getByEmail trong service
-    if (existingUser)
-      return res.status(400).send("Email này đã được sử dụng rồi sếp ơi!");
-
-    await userService.create({ name, email, password });
-
-    // Đăng ký xong cho sếp về trang Login luôn
     res.redirect("/login");
   } catch (error) {
     res.status(500).send("Lỗi đăng ký: " + error.message);
   }
+};
+exports.logout = (req, res) => {
+  res.clearCookie("token"); // Xóa sạch vé khi đăng xuất
+  res.redirect("/login");
 };
