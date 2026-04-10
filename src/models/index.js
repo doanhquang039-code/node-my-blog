@@ -5,6 +5,10 @@ const Tag = require("./tagModel");
 const Comment = require("./commentModel");
 const PostTag = require("./postTagModel");
 const PostAnalytics = require("./postAnalyticsModel");
+const Newsletter = require("./newsletterModel");
+const CommentRating = require("./commentRatingModel");
+const UserActivity = require("./userActivityModel");
+const ScheduledPost = require("./scheduledPostModel");
 
 // 1. QUAN HỆ USERS - POSTS (1-N)
 // Sếp dùng 'userId' vì trong Model Post mình đã map nó tới 'user_id'
@@ -37,6 +41,23 @@ Post.hasMany(Comment, { foreignKey: "post_id", as: "comments" });
 Comment.belongsTo(Post, { foreignKey: "post_id", as: "post" });
 Post.hasOne(PostAnalytics, { foreignKey: "post_id", as: "stats" });
 PostAnalytics.belongsTo(Post, { foreignKey: "post_id" });
+
+// Comment ratings relationships
+Comment.hasMany(CommentRating, { foreignKey: "comment_id", as: "ratings" });
+CommentRating.belongsTo(Comment, { foreignKey: "comment_id" });
+User.hasMany(CommentRating, { foreignKey: "user_id" });
+CommentRating.belongsTo(User, { foreignKey: "user_id" });
+
+// User activity relationships
+User.hasMany(UserActivity, { foreignKey: "user_id", as: "activities" });
+UserActivity.belongsTo(User, { foreignKey: "user_id" });
+Post.hasMany(UserActivity, { foreignKey: "post_id" });
+UserActivity.belongsTo(Post, { foreignKey: "post_id" });
+
+// Scheduled posts relationships
+Post.hasMany(ScheduledPost, { foreignKey: "post_id" });
+ScheduledPost.belongsTo(Post, { foreignKey: "post_id" });
+
 module.exports = {
   User,
   Post,
@@ -45,4 +66,8 @@ module.exports = {
   Comment,
   PostTag,
   PostAnalytics,
+  Newsletter,
+  CommentRating,
+  UserActivity,
+  ScheduledPost,
 };
