@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engagement Dashboard - <%= siteName || 'My Blog' %></title>
+    <link rel="stylesheet" href="/css/engagement.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+        
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 16px 24px;
+            margin-bottom: 32px;
+        }
+        
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+        
+        .navbar-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-blog"></i> <%= siteName || 'My Blog' %>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/" class="navbar-link"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/modern-blog" class="navbar-link"><i class="fas fa-newspaper"></i> Blog</a></li>
+                <li><a href="/engagement-dashboard" class="navbar-link"><i class="fas fa-chart-line"></i> Engagement</a></li>
+                <li><a href="/dashboard" class="navbar-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="engagement-dashboard">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="fas fa-chart-line"></i> Engagement Dashboard
+            </h1>
+            <p class="dashboard-subtitle">Track your reading activity, bookmarks, and interactions</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-label">Total Posts Read</div>
+                <div class="stat-value" id="totalPostsRead">0</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +5 this week
+                </div>
+            </div>
+
+            <div class="stat-card success">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Completed Posts</div>
+                <div class="stat-value" id="completedPosts">0</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +3 this week
+                </div>
+            </div>
+
+            <div class="stat-card warning">
+                <div class="stat-icon">🔖</div>
+                <div class="stat-label">Bookmarks</div>
+                <div class="stat-value" id="totalBookmarks">0</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +2 this week
+                </div>
+            </div>
+
+            <div class="stat-card danger">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-label">Reactions Given</div>
+                <div class="stat-value" id="totalReactions">0</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +8 this week
+                </div>
+            </div>
+        </div>
+
+        <!-- Reading Streak -->
+        <div class="reading-streak-widget">
+            <div class="streak-header">
+                <div class="streak-icon">🔥</div>
+                <div>
+                    <div class="streak-title">Current Streak</div>
+                    <div class="streak-count" id="currentStreak">0 days</div>
+                </div>
+            </div>
+            <div class="streak-stats">
+                <div class="streak-stat">
+                    <div class="streak-stat-label">Longest Streak</div>
+                    <div class="streak-stat-value" id="longestStreak">0</div>
+                </div>
+                <div class="streak-stat">
+                    <div class="streak-stat-label">Days Active</div>
+                    <div class="streak-stat-value" id="daysActive">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue Reading -->
+        <div class="continue-reading-section">
+            <h2 class="section-title">
+                <i class="fas fa-book-reader"></i> Continue Reading
+            </h2>
+            <div class="reading-list" id="continueReadingList">
+                <!-- Will be populated by JavaScript -->
+                <div class="loading-skeleton" style="height: 300px; border-radius: 12px;"></div>
+                <div class="loading-skeleton" style="height: 300px; border-radius: 12px;"></div>
+                <div class="loading-skeleton" style="height: 300px; border-radius: 12px;"></div>
+            </div>
+        </div>
+
+        <!-- Bookmark Collections -->
+        <div class="continue-reading-section">
+            <h2 class="section-title">
+                <i class="fas fa-folder"></i> Bookmark Collections
+            </h2>
+            <div class="bookmark-collections" id="bookmarkCollections">
+                <!-- Will be populated by JavaScript -->
+                <div class="loading-skeleton" style="height: 180px; border-radius: 12px;"></div>
+                <div class="loading-skeleton" style="height: 180px; border-radius: 12px;"></div>
+                <div class="loading-skeleton" style="height: 180px; border-radius: 12px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get JWT token from localStorage or cookie
+        const token = localStorage.getItem('token') || getCookie('token');
+        
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Fetch reading stats
+        async function fetchReadingStats() {
+            try {
+                const response = await fetch('/api/engagement/reading-stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalPostsRead').textContent = data.total_posts_read || 0;
+                    document.getElementById('completedPosts').textContent = data.completed_posts || 0;
+                    document.getElementById('currentStreak').textContent = `${data.currentStreak || 0} days`;
+                    document.getElementById('longestStreak').textContent = data.longestStreak || 0;
+                    document.getElementById('daysActive').textContent = data.days_active || 0;
+                }
+            } catch (error) {
+                console.error('Error fetching reading stats:', error);
+            }
+        }
+
+        // Fetch bookmark count
+        async function fetchBookmarkCount() {
+            try {
+                const response = await fetch('/api/engagement/bookmarks?limit=1', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalBookmarks').textContent = data.pagination?.total || 0;
+                }
+            } catch (error) {
+                console.error('Error fetching bookmarks:', error);
+            }
+        }
+
+        // Fetch continue reading posts
+        async function fetchContinueReading() {
+            try {
+                const response = await fetch('/api/engagement/continue-reading?limit=6', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const posts = await response.json();
+                    const container = document.getElementById('continueReadingList');
+                    
+                    if (posts.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #6b7280; grid-column: 1/-1;">No posts in progress. Start reading!</p>';
+                        return;
+                    }
+                    
+                    container.innerHTML = posts.map(post => `
+                        <div class="reading-card" onclick="window.location.href='/posts/${post.post_id}'">
+                            <img src="${post.image || '/images/default-post.jpg'}" alt="${post.title}" class="reading-card-image">
+                            <div class="reading-card-content">
+                                <h3 class="reading-card-title">${post.title}</h3>
+                                <div class="reading-card-meta">
+                                    <span><i class="far fa-clock"></i> ${formatDate(post.last_read_at)}</span>
+                                </div>
+                                <div class="reading-card-progress">
+                                    <div class="reading-card-progress-bar" style="width: ${post.progress}%"></div>
+                                </div>
+                                <div class="reading-card-progress-text">${post.progress}% complete</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error fetching continue reading:', error);
+                document.getElementById('continueReadingList').innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1/-1;">Error loading posts</p>';
+            }
+        }
+
+        // Fetch bookmark collections
+        async function fetchCollections() {
+            try {
+                const response = await fetch('/api/engagement/bookmarks/collections', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const collections = await response.json();
+                    const container = document.getElementById('bookmarkCollections');
+                    
+                    if (collections.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #6b7280; grid-column: 1/-1;">No collections yet. Create one!</p>';
+                        return;
+                    }
+                    
+                    const icons = ['📁', '⭐', '💼', '🎯', '📚', '🔖', '💡', '🎨'];
+                    
+                    container.innerHTML = collections.map((collection, index) => `
+                        <div class="collection-card" onclick="viewCollection(${collection.id})">
+                            <div class="collection-header">
+                                <div class="collection-icon">${icons[index % icons.length]}</div>
+                                <div class="collection-count">${collection.bookmark_count || 0}</div>
+                            </div>
+                            <h3 class="collection-title">${collection.name}</h3>
+                            <p class="collection-description">${collection.description || 'No description'}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error fetching collections:', error);
+                document.getElementById('bookmarkCollections').innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1/-1;">Error loading collections</p>';
+            }
+        }
+
+        function viewCollection(collectionId) {
+            window.location.href = `/bookmarks?collection=${collectionId}`;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days} days ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Initialize dashboard
+        async function initDashboard() {
+            if (!token) {
+                alert('Please login to view your engagement dashboard');
+                window.location.href = '/login';
+                return;
+            }
+            
+            await Promise.all([
+                fetchReadingStats(),
+                fetchBookmarkCount(),
+                fetchContinueReading(),
+                fetchCollections()
+            ]);
+        }
+
+        // Load dashboard on page load
+        initDashboard();
+    </script>
+</body>
+</html>

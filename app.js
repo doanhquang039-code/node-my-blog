@@ -22,15 +22,17 @@ const newsletterRoutes = require("./src/routes/newsletterRoutes");
 const chatbotRoutes = require("./src/routes/chatbotRoutes");
 const userProfileRoutes = require("./src/routes/userProfileRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
+const advancedFilterRoutes = require("./src/routes/advancedFilterRoutes");
+const engagementRoutes = require("./src/routes/engagementRoutes");
 
-// Phase 2 Routes (Comment tạm vì chưa tạo files)
-// const notificationRoutes = require("./src/routes/notificationRoutes");
-// const themeRoutes = require("./src/routes/themeRoutes");
+// Phase 2 Routes
+const notificationRoutes = require("./src/routes/notificationRoutes");
+const themeRoutes = require("./src/routes/themeRoutes");
 // const messagingRoutes = require("./src/routes/messagingRoutes");
 // const achievementRoutes = require("./src/routes/achievementRoutes");
 
-// WebSocket Setup (Comment tạm vì chưa tạo file)
-// const setupWebSocketServer = require("./src/utils/websocketServer");
+// WebSocket Setup
+const setupWebSocketServer = require("./src/utils/websocketServer");
 
 require("./src/config/db");
 
@@ -70,10 +72,12 @@ app.use("/api/profile", userProfileRoutes);
 app.use("/profile", userProfileRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/api/filters", advancedFilterRoutes);
+app.use("/api/engagement", engagementRoutes);
 
-// Phase 2 API Routes (Comment tạm vì chưa tạo routes)
-// app.use("/api/notifications", notificationRoutes);
-// app.use("/api/themes", themeRoutes);
+// Phase 2 API Routes
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/themes", themeRoutes);
 // app.use("/api/conversations", messagingRoutes);
 // app.use("/api/achievements", achievementRoutes);
 
@@ -108,6 +112,21 @@ app.get("/drafts", (req, res) => {
 
 app.get("/settings", (req, res) => {
   res.render("settings", { siteName: "My Blog" });
+});
+
+// Modern Blog Page
+app.get("/modern-blog", (req, res) => {
+  res.render("modern-blog", { siteName: "My Blog" });
+});
+
+// Engagement Dashboard
+app.get("/engagement-dashboard", (req, res) => {
+  res.render("engagement-dashboard", { siteName: "My Blog" });
+});
+
+// Bookmarks Page
+app.get("/bookmarks", (req, res) => {
+  res.render("bookmarks", { siteName: "My Blog" });
 });
 
 // Role-based Dashboards
@@ -148,13 +167,17 @@ app.get("/manager/dashboard", (req, res) => {
 // Create HTTP server
 const server = http.createServer(app);
 
-// Setup WebSocket (Comment tạm vì chưa tạo file)
-// const wss = setupWebSocketServer(server);
+// Setup WebSocket
+const wss = setupWebSocketServer(server);
+
+// Make wss available globally for notifications
+global.wss = wss;
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
   console.log(`✅ Server đang chạy tại: http://localhost:${PORT}`);
-  console.log(`🎨 UI Pages available:`);
+  console.log(`✅ WebSocket available at ws://localhost:${PORT}${process.env.WS_PATH || '/ws'}`);
+  console.log(`\n🎨 UI Pages available:`);
   console.log(`   - Notifications: http://localhost:${PORT}/notifications`);
   console.log(`   - Themes: http://localhost:${PORT}/themes`);
   console.log(`   - Messaging: http://localhost:${PORT}/messaging`);
@@ -164,5 +187,7 @@ server.listen(PORT, () => {
   console.log(`   - Search: http://localhost:${PORT}/search-advanced`);
   console.log(`   - Drafts: http://localhost:${PORT}/drafts`);
   console.log(`   - Settings: http://localhost:${PORT}/settings`);
-  // console.log(`✅ WebSocket available at ws://localhost:${PORT}${process.env.WS_PATH || '/ws'}`);
+  console.log(`\n📡 API Endpoints:`);
+  console.log(`   - Notifications: http://localhost:${PORT}/api/notifications`);
+  console.log(`   - Themes: http://localhost:${PORT}/api/themes`);
 });

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookmarks - <%= siteName || 'My Blog' %></title>
+    <link rel="stylesheet" href="/css/engagement.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+        
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 16px 24px;
+            margin-bottom: 32px;
+        }
+        
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+        
+        .navbar-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #3b82f6;
+        }
+        
+        .bookmarks-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .create-collection-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .create-collection-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 12px;
+        }
+        
+        .filter-tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+        
+        .filter-tab:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+        
+        .filter-tab.active {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+        
+        .bookmarks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        
+        .bookmark-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .bookmark-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bookmark-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .bookmark-content {
+            padding: 20px;
+        }
+        
+        .bookmark-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .bookmark-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+        
+        .bookmark-collection {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #dbeafe;
+            color: #3b82f6;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .bookmark-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .bookmark-action-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .bookmark-action-btn:hover {
+            background: #f3f4f6;
+            border-color: #3b82f6;
+        }
+        
+        .bookmark-action-btn.remove {
+            color: #ef4444;
+        }
+        
+        .bookmark-action-btn.remove:hover {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state-text {
+            font-size: 16px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-blog"></i> <%= siteName || 'My Blog' %>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/" class="navbar-link"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/modern-blog" class="navbar-link"><i class="fas fa-newspaper"></i> Blog</a></li>
+                <li><a href="/engagement-dashboard" class="navbar-link"><i class="fas fa-chart-line"></i> Engagement</a></li>
+                <li><a href="/bookmarks" class="navbar-link"><i class="fas fa-bookmark"></i> Bookmarks</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="bookmarks-container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-bookmark"></i> My Bookmarks
+            </h1>
+            <button class="create-collection-btn" onclick="openCreateCollectionModal()">
+                <i class="fas fa-plus"></i> New Collection
+            </button>
+        </div>
+
+        <!-- Collections Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-collection="all" onclick="filterByCollection('all')">
+                All Bookmarks
+            </button>
+            <div id="collectionTabs"></div>
+        </div>
+
+        <!-- Bookmarks Grid -->
+        <div class="bookmarks-grid" id="bookmarksGrid">
+            <div class="loading-skeleton" style="height: 350px; border-radius: 12px;"></div>
+            <div class="loading-skeleton" style="height: 350px; border-radius: 12px;"></div>
+            <div class="loading-skeleton" style="height: 350px; border-radius: 12px;"></div>
+        </div>
+    </div>
+
+    <!-- Create Collection Modal -->
+    <div class="modal" id="createCollectionModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Create New Collection</h2>
+            <form onsubmit="createCollection(event)">
+                <div class="form-group">
+                    <label class="form-label">Collection Name</label>
+                    <input type="text" class="form-input" id="collectionName" required placeholder="e.g., Tech Articles">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description (Optional)</label>
+                    <textarea class="form-textarea" id="collectionDescription" placeholder="Describe this collection..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateCollectionModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Collection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token') || getCookie('token');
+        let currentCollection = 'all';
+        let collections = [];
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Fetch collections
+        async function fetchCollections() {
+            try {
+                const response = await fetch('/api/engagement/bookmarks/collections', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    collections = await response.json();
+                    renderCollectionTabs();
+                }
+            } catch (error) {
+                console.error('Error fetching collections:', error);
+            }
+        }
+
+        function renderCollectionTabs() {
+            const container = document.getElementById('collectionTabs');
+            container.innerHTML = collections.map(collection => `
+                <button class="filter-tab" data-collection="${collection.id}" onclick="filterByCollection(${collection.id})">
+                    ${collection.name} (${collection.bookmark_count || 0})
+                </button>
+            `).join('');
+        }
+
+        // Fetch bookmarks
+        async function fetchBookmarks(collectionId = null) {
+            try {
+                let url = '/api/engagement/bookmarks?limit=50';
+                if (collectionId && collectionId !== 'all') {
+                    url += `&collectionId=${collectionId}`;
+                }
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderBookmarks(data.bookmarks);
+                }
+            } catch (error) {
+                console.error('Error fetching bookmarks:', error);
+                document.getElementById('bookmarksGrid').innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1/-1;">Error loading bookmarks</p>';
+            }
+        }
+
+        function renderBookmarks(bookmarks) {
+            const container = document.getElementById('bookmarksGrid');
+            
+            if (bookmarks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">📚</div>
+                        <h2 class="empty-state-title">No bookmarks yet</h2>
+                        <p class="empty-state-text">Start bookmarking posts to save them for later!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = bookmarks.map(bookmark => `
+                <div class="bookmark-card" onclick="window.location.href='/posts/${bookmark.post_id}'">
+                    <img src="${bookmark.image || '/images/default-post.jpg'}" alt="${bookmark.title}" class="bookmark-image">
+                    <div class="bookmark-content">
+                        <h3 class="bookmark-title">${bookmark.title}</h3>
+                        <div class="bookmark-meta">
+                            <span><i class="far fa-calendar"></i> ${formatDate(bookmark.created_at)}</span>
+                        </div>
+                        ${bookmark.collection_name ? `
+                            <div class="bookmark-collection">
+                                <i class="fas fa-folder"></i> ${bookmark.collection_name}
+                            </div>
+                        ` : ''}
+                        <div class="bookmark-actions" onclick="event.stopPropagation()">
+                            <button class="bookmark-action-btn" onclick="moveToCollection(${bookmark.post_id})">
+                                <i class="fas fa-folder"></i> Move
+                            </button>
+                            <button class="bookmark-action-btn remove" onclick="removeBookmark(${bookmark.post_id})">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterByCollection(collectionId) {
+            currentCollection = collectionId;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-collection="${collectionId}"]`).classList.add('active');
+            
+            // Fetch bookmarks
+            fetchBookmarks(collectionId);
+        }
+
+        async function removeBookmark(postId) {
+            if (!confirm('Remove this bookmark?')) return;
+            
+            try {
+                const response = await fetch(`/api/engagement/bookmarks/${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    fetchBookmarks(currentCollection);
+                    fetchCollections();
+                }
+            } catch (error) {
+                console.error('Error removing bookmark:', error);
+            }
+        }
+
+        function moveToCollection(postId) {
+            // TODO: Implement move to collection modal
+            alert('Move to collection feature coming soon!');
+        }
+
+        function openCreateCollectionModal() {
+            document.getElementById('createCollectionModal').classList.add('active');
+        }
+
+        function closeCreateCollectionModal() {
+            document.getElementById('createCollectionModal').classList.remove('active');
+            document.getElementById('collectionName').value = '';
+            document.getElementById('collectionDescription').value = '';
+        }
+
+        async function createCollection(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('collectionName').value;
+            const description = document.getElementById('collectionDescription').value;
+            
+            try {
+                const response = await fetch('/api/engagement/bookmarks/collections', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+                
+                if (response.ok) {
+                    closeCreateCollectionModal();
+                    fetchCollections();
+                }
+            } catch (error) {
+                console.error('Error creating collection:', error);
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        // Initialize
+        if (!token) {
+            alert('Please login to view your bookmarks');
+            window.location.href = '/login';
+        } else {
+            fetchCollections();
+            fetchBookmarks();
+        }
+    </script>
+</body>
+</html>

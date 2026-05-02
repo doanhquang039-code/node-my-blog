@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= siteName %> - Modern Blog</title>
+    <link rel="stylesheet" href="/css/modern-blog.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Modern Header -->
+    <header class="modern-header">
+        <div class="header-container">
+            <a href="/" class="logo">
+                <div class="logo-icon"></div>
+                <span><%= siteName %></span>
+            </a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="/" class="nav-link">Trang chủ</a></li>
+                    <li><a href="/modern-blog" class="nav-link active">Blog</a></li>
+                    <li><a href="/categories" class="nav-link">Danh mục</a></li>
+                    <li><a href="/about" class="nav-link">Giới thiệu</a></li>
+                    <li><a href="/contact" class="nav-link">Liên hệ</a></li>
+                </ul>
+            </nav>
+            
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-user"></i>
+                    Đăng nhập
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 2rem;">
+        <!-- Hero Section -->
+        <section class="hero-section" style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Khám phá Blog
+            </h1>
+            <p style="font-size: 1.25rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+                Tìm kiếm và khám phá hàng ngàn bài viết chất lượng với bộ lọc thông minh
+            </p>
+        </section>
+
+        <!-- Advanced Filter Panel -->
+        <div class="filter-panel">
+            <div class="filter-header">
+                <h2 class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Bộ lọc nâng cao
+                </h2>
+                <button class="filter-toggle" onclick="toggleFilters()">
+                    <span id="filter-toggle-text">Thu gọn</span>
+                    <i class="fas fa-chevron-up" id="filter-toggle-icon"></i>
+                </button>
+            </div>
+
+            <div id="filter-content" class="filter-content">
+                <!-- Search -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm
+                    </label>
+                    <input type="text" class="filter-input" id="search" placeholder="Nhập từ khóa...">
+                </div>
+
+                <!-- Filter Grid -->
+                <div class="filter-grid" style="margin-top: 1.5rem;">
+                    <!-- Category -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-folder"></i>
+                            Danh mục
+                        </label>
+                        <select class="filter-select" id="categoryId">
+                            <option value="">Tất cả danh mục</option>
+                        </select>
+                    </div>
+
+                    <!-- Author -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-user-edit"></i>
+                            Tác giả
+                        </label>
+                        <select class="filter-select" id="authorId">
+                            <option value="">Tất cả tác giả</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-check-circle"></i>
+                            Trạng thái
+                        </label>
+                        <select class="filter-select" id="status">
+                            <option value="published">Đã xuất bản</option>
+                            <option value="draft">Bản nháp</option>
+                            <option value="scheduled">Đã lên lịch</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort By -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-sort"></i>
+                            Sắp xếp theo
+                        </label>
+                        <select class="filter-select" id="sortBy">
+                            <option value="created_at">Ngày tạo</option>
+                            <option value="views">Lượt xem</option>
+                            <option value="likes">Lượt thích</option>
+                            <option value="comments">Bình luận</option>
+                            <option value="rating">Đánh giá</option>
+                        </select>
+                    </div>
+
+                    <!-- Date From -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Từ ngày
+                        </label>
+                        <input type="date" class="filter-input" id="dateFrom">
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-check"></i>
+                            Đến ngày
+                        </label>
+                        <input type="date" class="filter-input" id="dateTo">
+                    </div>
+
+                    <!-- Min Views -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-eye"></i>
+                            Lượt xem tối thiểu
+                        </label>
+                        <input type="number" class="filter-input" id="minViews" placeholder="0" min="0">
+                    </div>
+
+                    <!-- Min Likes -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-heart"></i>
+                            Lượt thích tối thiểu
+                        </label>
+                        <input type="number" class="filter-input" id="minLikes" placeholder="0" min="0">
+                    </div>
+
+                    <!-- Featured Only -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-star"></i>
+                            Bài viết nổi bật
+                        </label>
+                        <select class="filter-select" id="isFeatured">
+                            <option value="">Tất cả</option>
+                            <option value="true">Chỉ nổi bật</option>
+                            <option value="false">Không nổi bật</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filter Actions -->
+                <div class="filter-actions">
+                    <button class="btn btn-primary" onclick="applyFilters()">
+                        <i class="fas fa-check"></i>
+                        Áp dụng bộ lọc
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        <i class="fas fa-redo"></i>
+                        Đặt lại
+                    </button>
+                    <button class="btn btn-secondary" onclick="saveFilterPreset()">
+                        <i class="fas fa-save"></i>
+                        Lưu bộ lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Filters -->
+        <div id="active-filters" class="active-filters" style="margin-bottom: 2rem;"></div>
+
+        <!-- Loading State -->
+        <div id="loading" style="display: none; text-align: center; padding: 3rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary-color);"></i>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">Đang tải...</p>
+        </div>
+
+        <!-- Posts Grid -->
+        <div id="posts-grid" class="posts-grid"></div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: var(--bg-primary); border-top: 1px solid var(--border-color); padding: 3rem 0; margin-top: 4rem;">
+        <div class="container text-center">
+            <p style="color: var(--text-secondary);">
+                © 2026 <%= siteName %>. Made with <i class="fas fa-heart" style="color: #ec4899;"></i> by Kiro AI
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // State
+        let currentPage = 1;
+        let currentFilters = {};
+        let filterOptions = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadFilterOptions();
+            await loadPosts();
+        });
+
+        // Load filter options
+        async function loadFilterOptions() {
+            try {
+                const response = await fetch('/api/filters/options');
+                const data = await response.json();
+                
+                if (data.success) {
+                    filterOptions = data.data;
+                    populateFilterOptions();
+                }
+            } catch (error) {
+                console.error('Error loading filter options:', error);
+            }
+        }
+
+        // Populate filter dropdowns
+        function populateFilterOptions() {
+            // Categories
+            const categorySelect = document.getElementById('categoryId');
+            filterOptions.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                categorySelect.appendChild(option);
+            });
+
+            // Authors
+            const authorSelect = document.getElementById('authorId');
+            filterOptions.authors.forEach(author => {
+                const option = document.createElement('option');
+                option.value = author.id;
+                option.textContent = author.name;
+                authorSelect.appendChild(option);
+            });
+        }
+
+        // Load posts
+        async function loadPosts(page = 1) {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('posts-grid').style.display = 'none';
+
+                const params = new URLSearchParams({
+                    ...currentFilters,
+                    page: page,
+                    limit: 12
+                });
+
+                const response = await fetch(`/api/filters/posts?${params}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderPosts(data.data.posts);
+                    renderPagination(data.data.pagination);
+                    currentPage = page;
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('posts-grid').style.display = 'grid';
+            }
+        }
+
+        // Render posts
+        function renderPosts(posts) {
+            const grid = document.getElementById('posts-grid');
+            grid.innerHTML = '';
+
+            if (posts.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">Không tìm thấy bài viết nào</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const card = createPostCard(post);
+                grid.appendChild(card);
+            });
+        }
+
+        // Create post card
+        function createPostCard(post) {
+            const card = document.createElement('div');
+            card.className = 'post-card fade-in';
+            card.onclick = () => window.location.href = `/posts/${post.slug}`;
+
+            card.innerHTML = `
+                ${post.featured_image ? 
+                    `<img src="${post.featured_image}" alt="${post.title}" class="post-image">` :
+                    `<div class="post-image"></div>`
+                }
+                <div class="post-content">
+                    <div class="post-meta">
+                        ${post.category_name ? `<span class="post-badge badge-category">${post.category_name}</span>` : ''}
+                        ${post.is_featured ? `<span class="post-badge badge-featured"><i class="fas fa-star"></i> Nổi bật</span>` : ''}
+                    </div>
+                    <h3 class="post-title">${post.title}</h3>
+                    <p class="post-excerpt">${post.excerpt || post.content.substring(0, 150) + '...'}</p>
+                    <div class="post-footer">
+                        <div class="post-author">
+                            <div class="author-avatar"></div>
+                            <div class="author-info">
+                                <div class="author-name">${post.author_name}</div>
+                                <div class="post-date">${formatDate(post.created_at)}</div>
+                            </div>
+                        </div>
+                        <div class="post-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                ${post.views || 0}
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                ${post.likes || 0}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Render pagination
+        function renderPagination(pagination) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            if (pagination.totalPages <= 1) return;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.disabled = !pagination.hasPrev;
+            prevBtn.onclick = () => loadPosts(pagination.page - 1);
+            container.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = 'page-btn' + (i === pagination.page ? ' active' : '');
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => loadPosts(i);
+                    container.appendChild(pageBtn);
+                } else if (i === pagination.page - 3 || i === pagination.page + 3) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.padding = '0 0.5rem';
+                    container.appendChild(dots);
+                }
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.disabled = !pagination.hasNext;
+            nextBtn.onclick = () => loadPosts(pagination.page + 1);
+            container.appendChild(nextBtn);
+        }
+
+        // Apply filters
+        function applyFilters() {
+            currentFilters = {
+                search: document.getElementById('search').value,
+                categoryId: document.getElementById('categoryId').value,
+                authorId: document.getElementById('authorId').value,
+                status: document.getElementById('status').value,
+                sortBy: document.getElementById('sortBy').value,
+                dateFrom: document.getElementById('dateFrom').value,
+                dateTo: document.getElementById('dateTo').value,
+                minViews: document.getElementById('minViews').value,
+                minLikes: document.getElementById('minLikes').value,
+                isFeatured: document.getElementById('isFeatured').value
+            };
+
+            // Remove empty values
+            Object.keys(currentFilters).forEach(key => {
+                if (!currentFilters[key]) delete currentFilters[key];
+            });
+
+            loadPosts(1);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('search').value = '';
+            document.getElementById('categoryId').value = '';
+            document.getElementById('authorId').value = '';
+            document.getElementById('status').value = 'published';
+            document.getElementById('sortBy').value = 'created_at';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('minViews').value = '';
+            document.getElementById('minLikes').value = '';
+            document.getElementById('isFeatured').value = '';
+            
+            currentFilters = {};
+            loadPosts(1);
+        }
+
+        // Toggle filters
+        function toggleFilters() {
+            const content = document.getElementById('filter-content');
+            const icon = document.getElementById('filter-toggle-icon');
+            const text = document.getElementById('filter-toggle-text');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+                text.textContent = 'Thu gọn';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+                text.textContent = 'Mở rộng';
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (days === 0) return 'Hôm nay';
+            if (days === 1) return 'Hôm qua';
+            if (days < 7) return `${days} ngày trước`;
+            if (days < 30) return `${Math.floor(days / 7)} tuần trước`;
+            if (days < 365) return `${Math.floor(days / 30)} tháng trước`;
+            return `${Math.floor(days / 365)} năm trước`;
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</body>
+</html>

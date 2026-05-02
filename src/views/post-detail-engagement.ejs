@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= post.title %> - <%= siteName || 'My Blog' %></title>
+    <link rel="stylesheet" href="/css/engagement.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        .post-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        
+        .post-header {
+            margin-bottom: 32px;
+        }
+        
+        .post-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        
+        .post-meta {
+            display: flex;
+            gap: 20px;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .post-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+        
+        .post-content {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #374151;
+            margin-bottom: 40px;
+        }
+        
+        .post-content p {
+            margin-bottom: 20px;
+        }
+        
+        .post-content h2 {
+            font-size: 32px;
+            margin: 32px 0 16px;
+            color: #1f2937;
+        }
+        
+        .post-content h3 {
+            font-size: 24px;
+            margin: 24px 0 12px;
+            color: #1f2937;
+        }
+        
+        .engagement-actions {
+            position: sticky;
+            top: 80px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+            z-index: 100;
+        }
+        
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .post-title {
+                font-size: 32px;
+            }
+            
+            .post-content {
+                font-size: 16px;
+            }
+            
+            .action-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress-container">
+        <div class="reading-progress-bar" id="readingProgressBar"></div>
+    </div>
+
+    <!-- Reading Progress Widget -->
+    <div class="reading-progress-widget" id="progressWidget">
+        <div class="progress-circle">
+            <svg width="80" height="80">
+                <circle class="progress-circle-bg" cx="40" cy="40" r="36"></circle>
+                <circle class="progress-circle-fill" cx="40" cy="40" r="36" 
+                        stroke-dasharray="226" stroke-dashoffset="226" id="progressCircle"></circle>
+            </svg>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+        <div class="progress-label">Reading Progress</div>
+    </div>
+
+    <!-- Post Content -->
+    <div class="post-container">
+        <!-- Post Header -->
+        <div class="post-header">
+            <h1 class="post-title"><%= post.title %></h1>
+            <div class="post-meta">
+                <span><i class="far fa-user"></i> <%= post.author_name || 'Anonymous' %></span>
+                <span><i class="far fa-calendar"></i> <%= new Date(post.created_at).toLocaleDateString() %></span>
+                <span><i class="far fa-eye"></i> <%= post.views || 0 %> views</span>
+            </div>
+        </div>
+
+        <% if (post.image) { %>
+        <img src="<%= post.image %>" alt="<%= post.title %>" class="post-image">
+        <% } %>
+
+        <!-- Engagement Actions -->
+        <div class="engagement-actions">
+            <div class="action-row">
+                <!-- Bookmark Button -->
+                <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">
+                    <span class="icon"><i class="far fa-bookmark"></i></span>
+                    <span class="text">Bookmark</span>
+                </button>
+
+                <!-- Social Share -->
+                <div class="social-share-container" style="margin: 0; padding: 0; box-shadow: none;">
+                    <span class="social-share-label">Share:</span>
+                    <button class="social-share-btn facebook tooltip" data-tooltip="Facebook" onclick="sharePost('facebook')">
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
+                    <button class="social-share-btn twitter tooltip" data-tooltip="Twitter" onclick="sharePost('twitter')">
+                        <i class="fab fa-twitter"></i>
+                    </button>
+                    <button class="social-share-btn linkedin tooltip" data-tooltip="LinkedIn" onclick="sharePost('linkedin')">
+                        <i class="fab fa-linkedin-in"></i>
+                    </button>
+                    <button class="social-share-btn whatsapp tooltip" data-tooltip="WhatsApp" onclick="sharePost('whatsapp')">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button class="social-share-btn copy tooltip" data-tooltip="Copy Link" onclick="copyLink()">
+                        <i class="fas fa-link"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Content -->
+        <div class="post-content" id="postContent">
+            <%- post.content %>
+        </div>
+
+        <!-- Reactions -->
+        <div class="reaction-container">
+            <button class="reaction-btn tooltip" data-tooltip="Like" data-reaction="like" onclick="addReaction('like')">
+                👍
+                <span class="reaction-count" id="count-like">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Love" data-reaction="love" onclick="addReaction('love')">
+                ❤️
+                <span class="reaction-count" id="count-love">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Haha" data-reaction="haha" onclick="addReaction('haha')">
+                😂
+                <span class="reaction-count" id="count-haha">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Wow" data-reaction="wow" onclick="addReaction('wow')">
+                😮
+                <span class="reaction-count" id="count-wow">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Sad" data-reaction="sad" onclick="addReaction('sad')">
+                😢
+                <span class="reaction-count" id="count-sad">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Angry" data-reaction="angry" onclick="addReaction('angry')">
+                😠
+                <span class="reaction-count" id="count-angry">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Thinking" data-reaction="thinking" onclick="addReaction('thinking')">
+                🤔
+                <span class="reaction-count" id="count-thinking">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Fire" data-reaction="fire" onclick="addReaction('fire')">
+                🔥
+                <span class="reaction-count" id="count-fire">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Clap" data-reaction="clap" onclick="addReaction('clap')">
+                👏
+                <span class="reaction-count" id="count-clap">0</span>
+            </button>
+            <button class="reaction-btn tooltip" data-tooltip="Rocket" data-reaction="rocket" onclick="addReaction('rocket')">
+                🚀
+                <span class="reaction-count" id="count-rocket">0</span>
+            </button>
+
+            <div class="reaction-summary">
+                <div class="reaction-stat">
+                    <span class="emoji">❤️</span>
+                    <span class="count" id="totalReactions">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const postId = <%= post.id %>;
+        const token = localStorage.getItem('token') || getCookie('token');
+        let userReaction = null;
+        let isBookmarked = false;
+        let currentProgress = 0;
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Track reading progress
+        function updateReadingProgress() {
+            const content = document.getElementById('postContent');
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            const progress = Math.min(100, Math.round((scrollTop / (documentHeight - windowHeight)) * 100));
+            currentProgress = progress;
+            
+            // Update progress bar
+            document.getElementById('readingProgressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = progress + '%';
+            
+            // Update progress circle
+            const circumference = 226;
+            const offset = circumference - (progress / 100) * circumference;
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+            
+            // Save progress to server
+            if (token && progress > 0) {
+                saveProgress(progress);
+            }
+        }
+
+        let saveProgressTimeout;
+        async function saveProgress(progress) {
+            clearTimeout(saveProgressTimeout);
+            saveProgressTimeout = setTimeout(async () => {
+                try {
+                    await fetch('/api/engagement/progress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            postId: postId,
+                            progress: progress,
+                            scrollPosition: window.pageYOffset
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error saving progress:', error);
+                }
+            }, 2000);
+        }
+
+        // Bookmark functions
+        async function toggleBookmark() {
+            if (!token) {
+                alert('Please login to bookmark posts');
+                return;
+            }
+
+            try {
+                if (isBookmarked) {
+                    await fetch(`/api/engagement/bookmarks/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    isBookmarked = false;
+                    updateBookmarkButton();
+                } else {
+                    await fetch('/api/engagement/bookmarks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ postId: postId })
+                    });
+                    isBookmarked = true;
+                    updateBookmarkButton();
+                }
+            } catch (error) {
+                console.error('Error toggling bookmark:', error);
+            }
+        }
+
+        function updateBookmarkButton() {
+            const btn = document.getElementById('bookmarkBtn');
+            if (isBookmarked) {
+                btn.classList.add('bookmarked');
+                btn.querySelector('.icon').innerHTML = '<i class="fas fa-bookmark"></i>';
+                btn.querySelector('.text').textContent = 'Bookmarked';
+            } else {
+                btn.classList.remove('bookmarked');
+                btn.querySelector('.icon').innerHTML = '<i class="far fa-bookmark"></i>';
+                btn.querySelector('.text').textContent = 'Bookmark';
+            }
+        }
+
+        // Reaction functions
+        async function addReaction(reactionType) {
+            if (!token) {
+                alert('Please login to react to posts');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/engagement/reactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        postId: postId,
+                        reactionType: reactionType
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.reaction-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button if not removed
+                    if (data.action !== 'removed') {
+                        document.querySelector(`[data-reaction="${reactionType}"]`).classList.add('active');
+                        userReaction = reactionType;
+                    } else {
+                        userReaction = null;
+                    }
+                    
+                    // Refresh reaction counts
+                    fetchReactions();
+                }
+            } catch (error) {
+                console.error('Error adding reaction:', error);
+            }
+        }
+
+        async function fetchReactions() {
+            try {
+                const response = await fetch(`/api/engagement/reactions/${postId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    let total = 0;
+                    
+                    data.reactions.forEach(reaction => {
+                        const count = reaction.count;
+                        total += count;
+                        document.getElementById(`count-${reaction.reaction_type}`).textContent = count;
+                    });
+                    
+                    document.getElementById('totalReactions').textContent = total;
+                }
+            } catch (error) {
+                console.error('Error fetching reactions:', error);
+            }
+        }
+
+        async function fetchUserReaction() {
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`/api/engagement/reactions/${postId}/user`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.reaction) {
+                        userReaction = data.reaction;
+                        document.querySelector(`[data-reaction="${data.reaction}"]`).classList.add('active');
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user reaction:', error);
+            }
+        }
+
+        // Share functions
+        async function sharePost(platform) {
+            const url = window.location.href;
+            const title = '<%= post.title %>';
+            
+            let shareUrl;
+            switch(platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+                    break;
+                case 'linkedin':
+                    shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
+                    break;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+                
+                // Track share
+                if (token) {
+                    try {
+                        await fetch('/api/engagement/share', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                postId: postId,
+                                platform: platform
+                            })
+                        });
+                    } catch (error) {
+                        console.error('Error tracking share:', error);
+                    }
+                }
+            }
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Link copied to clipboard!');
+            });
+        }
+
+        // Check if bookmarked
+        async function checkBookmark() {
+            if (!token) return;
+            
+            try {
+                const response = await fetch('/api/engagement/bookmarks', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    isBookmarked = data.bookmarks.some(b => b.post_id === postId);
+                    updateBookmarkButton();
+                }
+            } catch (error) {
+                console.error('Error checking bookmark:', error);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('scroll', updateReadingProgress);
+        window.addEventListener('resize', updateReadingProgress);
+
+        // Load initial data
+        updateReadingProgress();
+        fetchReactions();
+        fetchUserReaction();
+        checkBookmark();
+    </script>
+</body>
+</html>

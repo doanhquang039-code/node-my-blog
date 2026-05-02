@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "db:migrate": "npx sequelize-cli db:migrate --config src/config/config.json",
     "db:undo": "npx sequelize-cli db:migrate:undo --config src/config/config.json",
     "test": "echo \"Error: no test specified\" && exit 1"
