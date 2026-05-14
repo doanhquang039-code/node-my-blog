@@ -10,16 +10,18 @@ const ChatMessage = sequelize.define('ChatMessage', {
     sessionId: {
         type: DataTypes.STRING,
         allowNull: false,
+        field: 'session_id',
         references: {
             model: 'chat_sessions',
-            key: 'sessionId'
+            key: 'session_id'
         }
     },
     userId: {
         type: DataTypes.INTEGER,
         allowNull: true,
+        field: 'user_id',
         references: {
-            model: 'Users',
+            model: 'users',
             key: 'id'
         }
     },
@@ -32,7 +34,8 @@ const ChatMessage = sequelize.define('ChatMessage', {
         allowNull: false
     },
     messageType: {
-        type: DataTypes.ENUM('text', 'rich', 'mixed', 'action'),
+        type: DataTypes.ENUM('text', 'rich', 'mixed'),
+        field: 'message_type',
         defaultValue: 'text'
     },
     attachments: {
@@ -59,24 +62,22 @@ const ChatMessage = sequelize.define('ChatMessage', {
     },
     ratedAt: {
         type: DataTypes.DATE,
+        field: 'rated_at',
         allowNull: true
-    },
-    isRead: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
     },
     createdAt: {
         type: DataTypes.DATE,
+        field: 'created_at',
         defaultValue: DataTypes.NOW
     }
 }, {
     tableName: 'chat_messages',
     timestamps: false,
     indexes: [
-        { fields: ['sessionId'] },
-        { fields: ['userId'] },
+        { fields: ['session_id'] },
+        { fields: ['user_id'] },
         { fields: ['sender'] },
-        { fields: ['createdAt'] }
+        { fields: ['created_at'] }
     ]
 });
 

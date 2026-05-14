@@ -11,10 +11,11 @@ const authenticateToken = async (req, res, next) => {
             return res.status(401).json({ error: 'Access token required' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const secret = process.env.JWT_SECRET || "SECRET_KEY_CUA_SEP";
+        const decoded = jwt.verify(token, secret);
         const user = await User.findByPk(decoded.userId);
 
-        if (!user || !user.isActive) {
+        if (!user || user.status === "inactive" || user.isActive === false) {
             return res.status(401).json({ error: 'Invalid or inactive user' });
         }
 

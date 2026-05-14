@@ -7,13 +7,13 @@ const ChatSession = sequelize.define('ChatSession', {
         primaryKey: true,
         autoIncrement: true
     },
-    session_id: {
+    sessionId: {
         type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
         field: 'session_id'
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: true,
         field: 'user_id'
@@ -26,17 +26,17 @@ const ChatSession = sequelize.define('ChatSession', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    started_at: {
+    startedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'started_at'
     },
-    last_activity_at: {
+    lastActivityAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'last_activity_at'
     },
-    ended_at: {
+    endedAt: {
         type: DataTypes.DATE,
         allowNull: true,
         field: 'ended_at'

@@ -1,34 +1,47 @@
-version: "3.8"
-
 services:
-  # 1. Service Database (MySQL)
   db:
     image: mysql:8.0
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: node_blog_db
-      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: ${DB_NAME:-node_blog_db}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
     ports:
-      - "3307:3306" # Đổi chỗ này sếp nhé
+      - "${DB_PORT_HOST:-3307}:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  # 2. Service App (Node.js)
   app:
     build: .
+    restart: unless-stopped
     ports:
-      - "8081:8080" # Khớp với PORT=8080 trong .env của sếp
+      - "${APP_PORT_HOST:-8081}:8080"
     environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=123456
-      - DB_NAME=node_blog_db
-      - DB_PORT=3306
+      NODE_ENV: production
+      PORT: 8080
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      DB_NAME: ${DB_NAME:-node_blog_db}
+      DB_PORT: 3306
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      WS_PATH: ${WS_PATH:-/ws}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
-      - .:/app
-      - /app/node_modules
+      - uploads_data:/app/public/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
 
 volumes:
   db_data:
+  uploads_data:

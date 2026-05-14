@@ -24,6 +24,13 @@ const userProfileRoutes = require("./src/routes/userProfileRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const advancedFilterRoutes = require("./src/routes/advancedFilterRoutes");
 const engagementRoutes = require("./src/routes/engagementRoutes");
+const aiRoutes = require("./src/routes/aiRoutes");
+const socialRoutes = require("./src/routes/socialRoutes");
+const advancedAnalyticsRoutes = require("./src/routes/advancedAnalyticsRoutes");
+const cmsRoutes = require("./src/routes/cmsRoutes");
+const enhancedPostRoutes = require("./src/routes/enhancedPostRoutes");
+const enhancedCommentRoutes = require("./src/routes/enhancedCommentRoutes");
+const enhancedChatbotRoutes = require("./src/routes/chatbotRouter");
 
 // Phase 2 Routes
 const notificationRoutes = require("./src/routes/notificationRoutes");
@@ -74,6 +81,13 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/api/filters", advancedFilterRoutes);
 app.use("/api/engagement", engagementRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/social", socialRoutes);
+app.use("/api/advanced-analytics", advancedAnalyticsRoutes);
+app.use("/api/cms", cmsRoutes);
+app.use("/api/posts/advanced", enhancedPostRoutes);
+app.use("/api/comments/advanced", enhancedCommentRoutes);
+app.use("/api/chatbot/advanced", enhancedChatbotRoutes);
 
 // Phase 2 API Routes
 app.use("/api/notifications", notificationRoutes);
@@ -174,6 +188,15 @@ const wss = setupWebSocketServer(server);
 global.wss = wss;
 
 const PORT = process.env.PORT || 8080;
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "my-blog-node",
+    timestamp: new Date().toISOString()
+  });
+});
+
+if (require.main === module) {
 server.listen(PORT, () => {
   console.log(`✅ Server đang chạy tại: http://localhost:${PORT}`);
   console.log(`✅ WebSocket available at ws://localhost:${PORT}${process.env.WS_PATH || '/ws'}`);
@@ -191,3 +214,6 @@ server.listen(PORT, () => {
   console.log(`   - Notifications: http://localhost:${PORT}/api/notifications`);
   console.log(`   - Themes: http://localhost:${PORT}/api/themes`);
 });
+}
+
+module.exports = { app, server };

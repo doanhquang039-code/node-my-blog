@@ -21,6 +21,7 @@ const UserFollower = require("./UserFollower");
 const UserBadge = require("./UserBadge");
 const ChatSession = require("./ChatSession");
 const ChatMessage = require("./ChatMessage");
+const Chatbot = require("./chatbot");
 
 // 1. QUAN HỆ USERS - POSTS (1-N)
 // Sếp dùng 'userId' vì trong Model Post mình đã map nó tới 'user_id'
@@ -88,24 +89,27 @@ UserFollower.belongsTo(User, { foreignKey: "following_id", as: "following" });
 User.hasMany(UserBadge, { foreignKey: "user_id", as: "badges" });
 UserBadge.belongsTo(User, { foreignKey: "user_id" });
 
-User.hasMany(ChatSession, { foreignKey: "user_id" });
-ChatSession.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(ChatSession, { foreignKey: "userId" });
+ChatSession.belongsTo(User, { foreignKey: "userId" });
 
 // ChatSession to ChatMessage relationship using session_id (string)
 // Note: session_id is a string field, not integer
 ChatSession.hasMany(ChatMessage, { 
-    foreignKey: "session_id", 
-    sourceKey: "session_id",
+    foreignKey: "sessionId", 
+    sourceKey: "sessionId",
     as: "messages"
 });
 ChatMessage.belongsTo(ChatSession, { 
-    foreignKey: "session_id", 
-    targetKey: "session_id",
+    foreignKey: "sessionId", 
+    targetKey: "sessionId",
     as: "session"
 });
 
-User.hasMany(ChatMessage, { foreignKey: "user_id" });
-ChatMessage.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(ChatMessage, { foreignKey: "userId" });
+ChatMessage.belongsTo(User, { foreignKey: "userId" });
+
+User.hasMany(Chatbot, { foreignKey: "userId", as: "chatbotMessages" });
+Chatbot.belongsTo(User, { foreignKey: "userId", as: "author" });
 
 module.exports = {
   User,
@@ -129,4 +133,5 @@ module.exports = {
   UserBadge,
   ChatSession,
   ChatMessage,
+  Chatbot,
 };

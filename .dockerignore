@@ -1,0 +1,14 @@
+.git
+.github
+.vscode
+node_modules
+.npm-cache
+npm-debug.log*
+.env
+public/uploads
+coverage
+dist
+build
+*.md
+Dockerfile
+docker-compose.yml

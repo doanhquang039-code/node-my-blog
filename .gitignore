@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+.env
+npm-debug.log*
+coverage/
+dist/
+build/
+public/uploads/
